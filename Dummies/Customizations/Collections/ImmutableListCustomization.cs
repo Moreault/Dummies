@@ -23,15 +23,3 @@ public sealed class ImmutableListCustomization : ICustomization
 
     private static ImmutableList<T> ToImmutableList<T>(IEnumerable<T> source) => source.ToImmutableList();
 }
-
-public sealed record Anus
-{
-    public int Id { get; init; }
-    public double Diameter { get; init; }
-}
-
-[AutoCustomization]
-public sealed class AnusCustomization : CustomizationBase<Anus>
-{
-    public override IDummyBuilder<Anus> Build(Dummy dummy) => dummy.Build<Anus>().Without(x => x.Id);
-}
