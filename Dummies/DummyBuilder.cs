@@ -23,6 +23,16 @@ public interface IDummyBuilder<T> : IDummyBuilder
 
     //TODO Make sure that properties are not automatically set (unless explicitly specified in the _memberValues) when using a factory.
     IDummyBuilder<T> FromFactory(Func<T> factory);
+
+    /// <summary>
+    /// Excludes the specified values from being generated for the specified enum type.
+    /// </summary>
+    IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum;
+
+    /// <summary>
+    /// Excludes the specified values from being generated for the specified enum type.
+    /// </summary>
+    IDummyBuilder<T> Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum;
 }
 
 internal sealed class DummyBuilder<T> : IDummyBuilder<T>
@@ -76,6 +86,14 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     public IDummyBuilder<T> FromFactory(Func<T> factory)
     {
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+        return this;
+    }
+
+    public IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => Exclude(values as IEnumerable<TEnum>);
+
+    public IDummyBuilder<T> Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum
+    {
+        _dummy.Exclude(values);
         return this;
     }
 
@@ -136,6 +154,14 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 {
                     instance = DynamicObjectGenerator.From<T>();
                 }
+                else if (typeof(T).IsEnum)
+                {
+                    var hasExclusions = _dummy.EnumExclusions.TryGetValue(typeof(T), out var exclusions);
+                    var possibleValues = hasExclusions ?
+                        Enum.GetValues(typeof(T)).Cast<T>().Where(x => !exclusions!.Contains(x!)).ToArray() :
+                        Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+                    instance = possibleValues.GetRandom();
+                }
                 else
                 {
                     //TODO Support creating types that have constructors no matter how complex
@@ -151,7 +177,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
             foreach (var property in typeof(T).GetAllProperties(x => x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic && !x.IsIndexer()))
             {
-                var memberValue = _memberValues.SingleOrDefault(x => x.MemberInfo == property);
+                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == property);
                 if (memberValue is null)
                     property.SetValue(instance, _dummy.Create(property.PropertyType));
                 else if (_factory is null)
@@ -160,7 +186,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
             foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
             {
-                var memberValue = _memberValues.SingleOrDefault(x => x.MemberInfo == field);
+                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == field);
                 if (memberValue is null)
                     field.SetValue(instance, _dummy.Create(field.FieldType));
                 else if (_factory is null)

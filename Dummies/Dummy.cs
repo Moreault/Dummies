@@ -1,19 +1,29 @@
-﻿using System.Numerics;
-using ToolBX.Mathemancy.Randomness;
-
-namespace ToolBX.Dummies;
+﻿namespace ToolBX.Dummies;
 
 public interface IDummy
 {
+    /// <summary>
+    /// Generates unique random numbers
+    /// </summary>
+    IDummyNumberBuilder Number { get; }
+
     T Create<T>();
     object Create(Type type);
     IEnumerable<T> CreateMany<T>();
     IEnumerable<T> CreateMany<T>(int amount);
     IEnumerable<object> CreateMany(Type type);
     IEnumerable<object> CreateMany(Type type, int amount);
+
     IDummyBuilder<T> Build<T>();
     IDummy Customize(params ICustomization[] customizations);
     IDummy Customize(IEnumerable<ICustomization> customizations);
+
+    /// <summary>
+    /// Excludes the specified values from being generated for the specified enum type.
+    /// </summary>
+    IDummy Exclude<TEnum>(params TEnum[] values) where TEnum : Enum;
+
+    IDummy Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum;
 }
 
 public sealed class Dummy : IDummy
@@ -23,6 +33,10 @@ public sealed class Dummy : IDummy
     private readonly List<long> _generatedNumbers = new();
 
     internal List<ICustomization> Customizations { get; } = new();
+
+    internal readonly Dictionary<Type, List<object>> EnumExclusions = new();
+
+    public IDummyNumberBuilder Number => new DummyNumberBuilder(this);
 
     public T Create<T>() => Build<T>().Create();
 
@@ -46,6 +60,16 @@ public sealed class Dummy : IDummy
             yield return Create(type);
     }
 
+    public T CreateBetween<T>(T min, T max) where T : INumber<T> => TryGenerateUnique(min, max);
+
+    public IEnumerable<T> CreateManyBetween<T>(T min, T max) where T : INumber<T> => CreateManyBetween(min, max, GlobalOptions.DefaultCollectionSize);
+
+    public IEnumerable<T> CreateManyBetween<T>(T min, T max, int amount) where T : INumber<T>
+    {
+        for (var i = 0; i < amount; i++)
+            yield return TryGenerateUnique(min, max);
+    }
+
     public IDummyBuilder<T> Build<T>() => new DummyBuilder<T>(this);
 
     public IDummy Customize(params ICustomization[] customizations) => Customize(customizations as IEnumerable<ICustomization>);
@@ -54,6 +78,17 @@ public sealed class Dummy : IDummy
     {
         if (customizations is null) throw new ArgumentNullException(nameof(customizations));
         Customizations.AddRange(customizations);
+        return this;
+    }
+
+    public IDummy Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => Exclude(values as IEnumerable<TEnum>);
+
+    public IDummy Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum
+    {
+        var exclusions = EnumExclusions.TryGetValue(typeof(TEnum), out var list) ? list : [];
+        foreach (var value in values)
+            exclusions.Add(value);
+        EnumExclusions[typeof(TEnum)] = exclusions;
         return this;
     }
 

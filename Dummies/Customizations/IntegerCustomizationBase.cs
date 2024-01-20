@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace ToolBX.Dummies.Customizations;
+﻿namespace ToolBX.Dummies.Customizations;
 
 public abstract class IntegerCustomizationBase<T> : CustomizationBase<T> where T : INumber<T>
 {
