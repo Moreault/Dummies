@@ -7,8 +7,10 @@ public interface IDummy
 {
     T Create<T>();
     object Create(Type type);
-    IEnumerable<T> CreateMany<T>(int amount = 3);
-    IEnumerable<object> CreateMany(Type type, int amount = 3);
+    IEnumerable<T> CreateMany<T>();
+    IEnumerable<T> CreateMany<T>(int amount);
+    IEnumerable<object> CreateMany(Type type);
+    IEnumerable<object> CreateMany(Type type, int amount);
     IDummyBuilder<T> Build<T>();
     IDummy Customize(params ICustomization[] customizations);
     IDummy Customize(IEnumerable<ICustomization> customizations);
@@ -16,6 +18,8 @@ public interface IDummy
 
 public sealed class Dummy : IDummy
 {
+    public static DummyOptions GlobalOptions { get; } = new();
+
     private readonly List<long> _generatedNumbers = new();
 
     internal List<ICustomization> Customizations { get; } = new();
@@ -28,9 +32,13 @@ public sealed class Dummy : IDummy
         return typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.ContainsGenericParameters).MakeGenericMethod(type).Invoke(this, Array.Empty<object>())!;
     }
 
-    public IEnumerable<T> CreateMany<T>(int amount = 3) => Build<T>().CreateMany(amount);
+    public IEnumerable<T> CreateMany<T>() => CreateMany<T>(GlobalOptions.DefaultCollectionSize);
 
-    public IEnumerable<object> CreateMany(Type type, int amount = 3)
+    public IEnumerable<T> CreateMany<T>(int amount) => Build<T>().CreateMany(amount);
+
+    public IEnumerable<object> CreateMany(Type type) => CreateMany(type, GlobalOptions.DefaultCollectionSize);
+
+    public IEnumerable<object> CreateMany(Type type, int amount)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
 

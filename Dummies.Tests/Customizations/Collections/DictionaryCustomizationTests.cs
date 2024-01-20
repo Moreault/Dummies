@@ -26,4 +26,16 @@ public sealed class ImmutableDictionaryCustomizationTests : Tester
         //Assert
         result.Should().HaveCount(3);
     }
+
+    [TestMethod]
+    public void WhenIsIReadOnlyDictionary_CreateWithMutlipleElements()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Create<IReadOnlyDictionary<string, float>>();
+
+        //Assert
+        result.Should().HaveCount(3);
+    }
 }

@@ -7,7 +7,6 @@ public sealed class ListCustomizationTests : Tester
     public void Always_CreateWithMutlipleElements()
     {
         //Arrange
-        var anus = Dummy.CreateMany<int>();
 
         //Act
         var result = Dummy.Create<List<int>>();

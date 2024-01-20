@@ -14,8 +14,7 @@ public sealed class ArrayCustomization : ICustomization
         return dummy.Build<object>().FromFactory(() =>
         {
             var elementType = type.GetElementType();
-            var listType = typeof(List<>).MakeGenericType(elementType);
-            var list = ListCustomization.MakeGenericList(dummy, elementType);
+            var list = ListCustomizationBase.MakeGenericList(dummy, elementType);
 
             return typeof(ArrayCustomization)
                 .GetSingleMethod("ToArray").MakeGenericMethod(elementType)
