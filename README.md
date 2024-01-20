@@ -276,20 +276,3 @@ You can use the `Dummy.Number` property to have more control over how numbers ar
 ```cs
 
 ```
-
-
-## Creating numbers within a range
-You can use the `Dummy.CreateBetween(min, max)` and `Dummy.CreateManyBetween(min, max)` to create numbers of any type within a range. The `min` and `max` values are inclusive. It will also attempt to return unique numbers but it may give up if the range is very small.
-
-```cs
-
-var dummy = new Dummy();
-
-var number = dummy.CreateBetween(0, 10);
-
-//number will be between 0 and 10 (inclusive)
-
-var numbers = dummy.CreateManyBetween(0, 10, 10);
-
-//numbers will be a list of 10 unique numbers between 0 and 10 (inclusive)
-```
