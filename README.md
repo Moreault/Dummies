@@ -276,3 +276,17 @@ You can use the `Dummy.Number` property to have more control over how numbers ar
 ```cs
 
 ```
+
+## The `DateTimeDummyBuilder`
+You can use the `Dummy.DateTime` property to have more control over how `DateTime` objects are generated such as `Before`, `After` and `Between`. Do keep in mind that using the `DateTimeDummyBuilder` will bypass any customizations that are loaded for that type. To use `DateTime` customizations, you should use `Dummy.Create<DateTime>`. This builder will also attempt to return unique `DateTime` objects each time but it may give up on that if the range is very limited between two dates.
+
+```cs
+
+```
+
+## The `DummyStringBuilder`
+You can use the `Dummy.String` property to have more control over how `string` objects are generated such as `WithLength`, `WithMaxLength` and `WithMinLength`. Do keep in mind that using the `DummyStringBuilder` will bypass any customizations that are loaded for that type. To use `string` customizations, you should use `Dummy.Create<string>`. This builder will also attempt to return unique `string` objects each time but it may give up on that if your instructions make possibilities very limited.
+
+```cs
+
+```

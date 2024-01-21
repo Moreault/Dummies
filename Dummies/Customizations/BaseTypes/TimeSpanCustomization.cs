@@ -7,11 +7,11 @@ public sealed class TimeSpanCustomization : CustomizationBase<TimeSpan>
     {
         return dummy.Build<TimeSpan>().FromFactory(() =>
         {
-            var days = dummy.CreateBetween(0, 999);
-            var hours = dummy.CreateBetween(0, 23);
-            var minutes = dummy.CreateBetween(0, 59);
-            var seconds = dummy.CreateBetween(0, 59);
-            var milliseconds = dummy.CreateBetween(0, 999);
+            var days = PseudoRandomNumberGenerator.Shared.Generate(0, 999);
+            var hours = PseudoRandomNumberGenerator.Shared.Generate(0, 23);
+            var minutes = PseudoRandomNumberGenerator.Shared.Generate(0, 59);
+            var seconds = PseudoRandomNumberGenerator.Shared.Generate(0, 59);
+            var milliseconds = PseudoRandomNumberGenerator.Shared.Generate(0, 999);
 
             return new TimeSpan(days, hours, minutes, seconds, milliseconds);
         });

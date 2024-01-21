@@ -3,9 +3,19 @@
 public interface IDummy
 {
     /// <summary>
-    /// Generates unique random numbers
+    /// Generates unique random numbers bypassing all number <see cref="ICustomization"/>s.
     /// </summary>
     IDummyNumberBuilder Number { get; }
+
+    /// <summary>
+    /// Generates unique random date bypassing all DateTime <see cref="ICustomization"/>s.
+    /// </summary>
+    IDummyDateTimeBuilder Date { get; }
+
+    /// <summary>
+    /// Generates unique random strings bypassing all string <see cref="ICustomization"/>s.
+    /// </summary>
+    IDummyStringBuilder String { get; }
 
     T Create<T>();
     object Create(Type type);
@@ -38,6 +48,10 @@ public sealed class Dummy : IDummy
 
     public IDummyNumberBuilder Number => new DummyNumberBuilder(this);
 
+    public IDummyDateTimeBuilder Date => new DummyDateTimeBuilder(this);
+
+    public IDummyStringBuilder String => new DummyStringBuilder(this);
+
     public T Create<T>() => Build<T>().Create();
 
     public object Create(Type type)
@@ -58,16 +72,6 @@ public sealed class Dummy : IDummy
 
         for (var i = 0; i < amount; i++)
             yield return Create(type);
-    }
-
-    public T CreateBetween<T>(T min, T max) where T : INumber<T> => TryGenerateUnique(min, max);
-
-    public IEnumerable<T> CreateManyBetween<T>(T min, T max) where T : INumber<T> => CreateManyBetween(min, max, GlobalOptions.DefaultCollectionSize);
-
-    public IEnumerable<T> CreateManyBetween<T>(T min, T max, int amount) where T : INumber<T>
-    {
-        for (var i = 0; i < amount; i++)
-            yield return TryGenerateUnique(min, max);
     }
 
     public IDummyBuilder<T> Build<T>() => new DummyBuilder<T>(this);

@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class CharCustomization : CustomizationBase<char>
 {
-    private const string LatinAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private const string LatinAlphabet = Characters.Letters + Characters.Numbers;
 
     public override IDummyBuilder<char> Build(Dummy dummy) => dummy.Build<char>().FromFactory(() => LatinAlphabet.GetRandom());
 }

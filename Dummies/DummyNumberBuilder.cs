@@ -36,11 +36,15 @@ internal sealed class DummyNumberBuilder : IDummyNumberBuilder
 
     public IDummyNumberBuilder<T> Between<T>(T min, T max) where T : INumber<T>, IMinMaxValue<T> => new DummyNumberBuilder<T>(() => _dummy.TryGenerateUnique(min, max));
 
-    public T Create<T>() where T : INumber<T>, IMinMaxValue<T> => _dummy.Create<T>();
+    public T Create<T>() where T : INumber<T>, IMinMaxValue<T> => _dummy.TryGenerateUnique(T.MinValue, T.MaxValue);
 
-    public IEnumerable<T> CreateMany<T>() where T : INumber<T>, IMinMaxValue<T> => _dummy.CreateMany<T>();
+    public IEnumerable<T> CreateMany<T>() where T : INumber<T>, IMinMaxValue<T> => CreateMany<T>(Dummy.GlobalOptions.DefaultCollectionSize);
 
-    public IEnumerable<T> CreateMany<T>(int amount) where T : INumber<T>, IMinMaxValue<T> => _dummy.CreateMany<T>(amount);
+    public IEnumerable<T> CreateMany<T>(int amount) where T : INumber<T>, IMinMaxValue<T>
+    {
+        for (var i = 0; i < amount; i++)
+            yield return _dummy.TryGenerateUnique(T.MinValue, T.MaxValue);
+    }
 }
 
 internal sealed class DummyNumberBuilder<T> : IDummyNumberBuilder<T> where T : INumber<T>, IMinMaxValue<T>
