@@ -21,9 +21,26 @@ internal sealed class UniversalInterceptor : IInterceptor
             var propertyName = methodName[4..];
             _propertyValues[propertyName] = invocation.Arguments[0];
         }
+        else if (invocation.Method.IsAbstract && invocation.Method.ReturnType != typeof(void))
+        {
+            invocation.ReturnValue = invocation.Method.ReturnType.GetDefaultValue();
+        }
+        else if (invocation.Method.IsAbstract && invocation.Method.ReturnType == typeof(void))
+        {
+            // Do nothing
+        }
         else
         {
             invocation.Proceed();
         }
+    }
+}
+
+public static class DefaultValueHelper
+{
+    public static object? GetDefaultValue(this Type type)
+    {
+        if (type is null) throw new ArgumentNullException(nameof(type));
+        return type.IsValueType ? Activator.CreateInstance(type) : null;
     }
 }

@@ -70,8 +70,10 @@ public sealed class Dummy : IDummy
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
 
+        var results = new List<object>();
         for (var i = 0; i < amount; i++)
-            yield return Create(type);
+            results.Add(Create(type));
+        return results;
     }
 
     public IDummyBuilder<T> Build<T>() => new DummyBuilder<T>(this);

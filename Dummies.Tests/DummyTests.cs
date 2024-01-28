@@ -9,7 +9,7 @@ public class DummyTests : Tester
     public void WhenCreateInterfaceFromDotNetFramework_CreateProxyImplementingInterface()
     {
         //Arrange
-        
+
         //Act
         var result = Dummy.Create<IFormatProvider>();
 
@@ -95,4 +95,61 @@ public class DummyTests : Tester
         result.Should().NotContain(BogusEnum.G);
     }
 
+    [TestMethod]
+    public void CreateManyNonGeneric_WhenEnumeratingMultipleTimes_ShouldAlwaysBeTheSameResult()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateMany(typeof(string));
+
+        //Assert
+        result.ToList().Should().BeEquivalentTo(result.ToList());
+    }
+
+    [TestMethod]
+    public void CreateManyGeneric_WhenEnumeratingMultipleTimes_ShouldAlwaysBeTheSameResult()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateMany<string>();
+
+        //Assert
+        result.ToList().Should().BeEquivalentTo(result.ToList());
+    }
+
+    public interface IGarbage
+    {
+        string A { get; init; }
+        int B { get; init; }
+        int C { get; init; }
+        char D { get; set; }
+        long Get();
+        void Void();
+    }
+
+    [TestMethod]
+    public void Create_WhenIsInterface_ThenMethodsWithReturnValuesShouldReturnDefault()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Create<IGarbage>();
+
+        //Assert
+        result.Get().Should().Be(0);
+    }
+
+    [TestMethod]
+    public void Create_WhenIsInterface_ThenVoidMethodsShouldNotThrow()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Create<IGarbage>().Void();
+
+        //Assert
+        action.Should().NotThrow();
+    }
 }

@@ -43,7 +43,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private readonly Dummy _dummy;
 
-    private readonly List<MemberValuePair<object>> _memberValues = new();
+    private readonly List<MemberValuePair> _memberValues = new();
 
     private bool _usesCustomizations = true;
 
@@ -54,13 +54,11 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
     }
 
-    public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember value)
+    public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember? value)
     {
         if (member is null) throw new ArgumentNullException(nameof(member));
-        if (member.Body is MemberExpression memberExpression)
-        {
-            _memberValues.Add(new MemberValuePair<object>(memberExpression.Member, value));
-        }
+        var memberExpression = GetMemberExpression(member.Body);
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
         return this;
     }
 
@@ -68,11 +66,23 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     {
         if (member is null) throw new ArgumentNullException(nameof(member));
         if (value is null) throw new ArgumentNullException(nameof(value));
-        if (member.Body is MemberExpression memberExpression)
-        {
-            _memberValues.Add(new MemberValuePair<object>(memberExpression.Member, value));
-        }
+        var memberExpression = GetMemberExpression(member.Body);
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
         return this;
+    }
+
+    private MemberExpression GetMemberExpression(Expression body)
+    {
+        if (body is MemberExpression member)
+        {
+            return member;
+        }
+        if (body is UnaryExpression unaryExpression)
+        {
+            return (MemberExpression)unaryExpression.Operand;
+        }
+        //TODO Message
+        throw new ArgumentException();
     }
 
     public IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member) => With(member, default(TMember)!);
@@ -145,6 +155,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 _factory = concreteBuilder._factory;
         }
 
+        var output = new List<T>();
         for (var i = 0; i < amount; i++)
         {
             T instance;
@@ -193,7 +204,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                     field.SetValue(instance, memberValue.Value);
             }
 
-            yield return instance;
+            output.Add(instance);
         }
+
+        return output;
     }
 }
