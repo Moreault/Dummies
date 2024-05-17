@@ -7,7 +7,7 @@ public sealed class DateOnlyCustomization : CustomizationBase<DateOnly>
     {
         return dummy.Build<DateOnly>().FromFactory(() =>
         {
-            var year = PseudoRandomNumberGenerator.Shared.Generate(1, 9999);
+            var year = PseudoRandomNumberGenerator.Shared.Generate(1900, 2100);
             var month = PseudoRandomNumberGenerator.Shared.Generate(1, 12);
             var day = PseudoRandomNumberGenerator.Shared.Generate(1, 28);
 

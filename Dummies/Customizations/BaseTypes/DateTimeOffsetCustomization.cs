@@ -1,11 +1,11 @@
 ﻿namespace ToolBX.Dummies.Customizations.BaseTypes;
 
 [AutoCustomization]
-public sealed class DateTimeCustomization : CustomizationBase<DateTime>
+public sealed class DateTimeOffsetCustomization : CustomizationBase<DateTimeOffset>
 {
-    public override IDummyBuilder<DateTime> Build(Dummy dummy)
+    public override IDummyBuilder<DateTimeOffset> Build(Dummy dummy)
     {
-        return dummy.Build<DateTime>().FromFactory(() =>
+        return dummy.Build<DateTimeOffset>().FromFactory(() =>
         {
             var year = PseudoRandomNumberGenerator.Shared.Generate(1900, 2100);
             var month = PseudoRandomNumberGenerator.Shared.Generate(1, 12);
@@ -15,7 +15,7 @@ public sealed class DateTimeCustomization : CustomizationBase<DateTime>
             var second = PseudoRandomNumberGenerator.Shared.Generate(0, 59);
             var millisecond = PseudoRandomNumberGenerator.Shared.Generate(0, 999);
 
-            return new DateTime(year, month, day, hour, minute, second, millisecond, DateTimeKind.Unspecified);
+            return new DateTimeOffset(year, month, day, hour, minute, second, millisecond, default);
         });
     }
 }

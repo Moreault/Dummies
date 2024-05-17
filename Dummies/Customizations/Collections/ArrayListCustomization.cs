@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace ToolBX.Dummies.Customizations.Collections;
+﻿namespace ToolBX.Dummies.Customizations.Collections;
 
 [AutoCustomization]
 public sealed class ArrayListCustomization : ICustomization

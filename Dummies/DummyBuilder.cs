@@ -22,6 +22,7 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> WithoutCustomizations();
 
     //TODO Make sure that properties are not automatically set (unless explicitly specified in the _memberValues) when using a factory.
+    //TODO Or perhaps have FromFactoryOnly which does that?
     IDummyBuilder<T> FromFactory(Func<T> factory);
 
     /// <summary>
@@ -176,7 +177,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 else
                 {
                     //TODO Support creating types that have constructors no matter how complex
-                    var constructor = typeof(T).GetConstructors().Where(x => x.IsInstance()).OrderBy(x => x.GetParameters().Length).ThenBy(x => x.IsPublic).First();
+                    var constructor = typeof(T).GetConstructors().Where(x => x.IsInstance()).OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic).First();
 
                     instance = (T)constructor.Invoke(constructor.GetParameters().Select(x => _dummy.Create(x.ParameterType)).ToArray());
                 }

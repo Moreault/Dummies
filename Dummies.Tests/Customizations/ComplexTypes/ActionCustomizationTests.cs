@@ -222,4 +222,208 @@ public class ActionCustomizationTests : Tester
         //Assert
         action.Should().NotThrow();
     }
+
+    [TestMethod]
+    public void ZeroParameter_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action>();
+        var action2 = Dummy.Create<Action>();
+
+        //Act
+        //Assert
+        action1.Should().NotBeSameAs(action2);
+    }
+
+    [TestMethod]
+    public void OneParameter_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?>>();
+        var action2 = Dummy.Create<Action<object?>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void TwoParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int>>();
+        var action2 = Dummy.Create<Action<object?, int>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void ThreeParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string>>();
+        var action2 = Dummy.Create<Action<object?, int, string>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void FourParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void FiveParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void SixParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void SevenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void EightParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void NineParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void TenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void ElevenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void TwelveParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void ThirteenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void FourteenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void FifteenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly, TimeOnly>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly, TimeOnly>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
+
+    [TestMethod]
+    public void SixteenParameters_WhenYouHaveTwoActionsOfSameTypeButDifferentReferences_ShouldNotBeEqual()
+    {
+        //Arrange
+        var action1 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly, TimeOnly, DateTimeOffset?>>();
+        var action2 = Dummy.Create<Action<object?, int, string, DateTime, double, char, string, float, object, string, byte, sbyte, decimal, DateOnly, TimeOnly, DateTimeOffset?>>();
+
+        //Act
+        //Assert
+        action1.Should().NotBe(action2);
+    }
 }
