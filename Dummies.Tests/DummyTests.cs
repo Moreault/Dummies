@@ -30,7 +30,7 @@ public class DummyTests : Tester
         result.Should().BeOfType<string>();
     }
 
-    public sealed record BogusType
+    public sealed record GarbageType
     {
         public string A { get; init; }
         public int B { get; init; }
@@ -44,15 +44,15 @@ public class DummyTests : Tester
         //Arrange
 
         //Act
-        var result = Dummy.Build<BogusType>().With(x => x.A, "Hello").Create();
+        var result = Dummy.Build<GarbageType>().With(x => x.A, "Hello").Create();
 
         //Assert
         result.A.Should().Be("Hello");
     }
 
-    public sealed class BogusTypeCustomization : CustomizationBase<BogusType>
+    public sealed class BogusTypeCustomization : CustomizationBase<GarbageType>
     {
-        public override IDummyBuilder<BogusType> Build(Dummy dummy) => dummy.Build<BogusType>().With(x => x.B, 14);
+        public override IDummyBuilder<GarbageType> Build(IDummy dummy) => dummy.Build<GarbageType>().With(x => x.B, 14);
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public class DummyTests : Tester
         Dummy.Customize(new BogusTypeCustomization());
 
         //Act
-        var result = Dummy.Build<BogusType>().With(x => x.A, "Hello").Create();
+        var result = Dummy.Build<GarbageType>().With(x => x.A, "Hello").Create();
 
         //Assert
         result.A.Should().Be("Hello");
@@ -151,5 +151,31 @@ public class DummyTests : Tester
 
         //Assert
         action.Should().NotThrow();
+    }
+
+    public sealed class RecursiveGarbage
+    {
+        public int Id { get; init; }
+        public RecursiveGarbage Friend { get; init; } = null!;
+        public List<RecursiveGarbage> Friends { get; init; } = [];
+        public BicursiveGarbage Relative { get; init; } = null!;
+    }
+
+    public sealed class BicursiveGarbage
+    {
+        public RecursiveGarbage Friend { get; init; } = null!;
+    }
+
+    [TestMethod]
+    public void Create_WhenTypeIsRecursive_OnlyCreateObjectWithMaxDepth()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 3;
+
+        //Act
+        var result = Dummy.Create<RecursiveGarbage>();
+
+        //Assert
+        result.Friend.Friend.Friend.Should().BeNull();
     }
 }

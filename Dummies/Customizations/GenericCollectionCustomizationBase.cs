@@ -1,20 +1,20 @@
 ﻿namespace ToolBX.Dummies.Customizations;
 
-public abstract class GenericCollectionCustomizationBase : ICustomization
+public abstract class GenericCollectionCustomizationBase : CustomizationBase
 {
-    public abstract IEnumerable<Type> Types { get; }
-
-    public IDummyBuilder Build(Dummy dummy, Type type)
+    protected override IDummyBuilder BuildMe(IDummy dummy, Type type)
     {
-        if (dummy is null) throw new ArgumentNullException(nameof(dummy));
-        if (type is null) throw new ArgumentNullException(nameof(type));
-
-        return dummy.Build<object>().FromFactory(() => Factory(dummy, type));
+        return dummy.Build<object>().WithoutAutoProperties().FromFactory(() => Factory(dummy, type));
     }
 
-    protected abstract object Factory(Dummy dummy, Type type);
+    protected abstract object Factory(IDummy dummyGenerator, Type type);
 
-    protected static object CreateEnumerable(Dummy dummy, Type genericType)
+    protected static object CreateEnumerable(IDummy dummy, Type genericType) => EnumerableHelper.Create(dummy, genericType);
+}
+
+internal static class EnumerableHelper
+{
+    internal static object Create(IDummy dummy, Type genericType)
     {
         var objects = dummy.CreateMany(genericType);
 
@@ -28,4 +28,6 @@ public abstract class GenericCollectionCustomizationBase : ICustomization
 
         return instance;
     }
+
+
 }

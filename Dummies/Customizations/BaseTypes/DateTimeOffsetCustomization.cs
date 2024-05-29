@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class DateTimeOffsetCustomization : CustomizationBase<DateTimeOffset>
 {
-    public override IDummyBuilder<DateTimeOffset> Build(Dummy dummy)
+    public override IDummyBuilder<DateTimeOffset> Build(IDummy dummy)
     {
         return dummy.Build<DateTimeOffset>().FromFactory(() =>
         {

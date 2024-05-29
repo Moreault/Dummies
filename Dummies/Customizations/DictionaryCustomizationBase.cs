@@ -2,7 +2,7 @@
 
 public abstract class DictionaryCustomizationBase : GenericCollectionCustomizationBase
 {
-    protected override object Factory(Dummy dummy, Type type)
+    protected override object Factory(IDummy dummy, Type type)
     {
         var keyType = type.GetGenericArguments()[0];
         var valueType = type.GetGenericArguments()[1];

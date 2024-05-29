@@ -11,6 +11,7 @@ global using System.Text;
 global using Castle.DynamicProxy;
 global using ToolBX.CoinFlip;
 global using ToolBX.Dummies.Customizations;
+global using ToolBX.Dummies.Customizations.Collections;
 global using ToolBX.Mathemancy.Randomness;
 global using ToolBX.OPEX;
 global using ToolBX.Reflection4Humans.Extensions;

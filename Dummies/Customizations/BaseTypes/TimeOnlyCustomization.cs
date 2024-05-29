@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class TimeOnlyCustomization : CustomizationBase<TimeOnly>
 {
-    public override IDummyBuilder<TimeOnly> Build(Dummy dummy)
+    public override IDummyBuilder<TimeOnly> Build(IDummy dummy)
     {
         return dummy.Build<TimeOnly>().FromFactory(() =>
         {

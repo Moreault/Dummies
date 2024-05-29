@@ -3,6 +3,6 @@
 [AutoCustomization]
 public sealed class ImmutableListCustomization : ListCustomizationBase
 {
-    public override IEnumerable<Type> Types { get; } = [typeof(ImmutableList<>), typeof(IImmutableList<>)];
+    protected override IEnumerable<Type> Types { get; } = [typeof(ImmutableList<>), typeof(IImmutableList<>)];
     protected override object Convert<T>(IEnumerable<T> source) => source.ToImmutableList();
 }

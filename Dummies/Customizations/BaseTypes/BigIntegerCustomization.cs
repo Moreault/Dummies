@@ -3,5 +3,5 @@
 [AutoCustomization]
 public sealed class BigIntegerCustomization : CustomizationBase<BigInteger>
 {
-    public override IDummyBuilder<BigInteger> Build(Dummy dummy) => dummy.Build<BigInteger>().FromFactory(() => dummy.Create<long>());
+    public override IDummyBuilder<BigInteger> Build(IDummy dummy) => dummy.Build<BigInteger>().FromFactory(() => dummy.Create<long>());
 }

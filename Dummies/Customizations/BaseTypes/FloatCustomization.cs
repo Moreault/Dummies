@@ -3,5 +3,5 @@
 [AutoCustomization]
 public sealed class FloatCustomization : CustomizationBase<float>
 {
-    public override IDummyBuilder<float> Build(Dummy dummy) => dummy.Build<float>().FromFactory(() => dummy.GenerateFloatingPoint(1f, short.MaxValue, 5));
+    public override IDummyBuilder<float> Build(IDummy dummy) => dummy.Build<float>().FromFactory(() => dummy.Number.WithDecimals(5).Between(1f, short.MaxValue).Create());
 }

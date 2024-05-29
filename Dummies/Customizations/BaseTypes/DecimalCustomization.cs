@@ -3,5 +3,5 @@
 [AutoCustomization]
 public sealed class DecimalCustomization : CustomizationBase<decimal>
 {
-    public override IDummyBuilder<decimal> Build(Dummy dummy) => dummy.Build<decimal>().FromFactory(() => dummy.GenerateFloatingPoint(1M, short.MaxValue, 5));
+    public override IDummyBuilder<decimal> Build(IDummy dummy) => dummy.Build<decimal>().FromFactory(() => dummy.Number.WithDecimals(5).Between(1M, short.MaxValue).Create());
 }

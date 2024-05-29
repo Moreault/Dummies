@@ -79,7 +79,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public DateTime Create() => Between(DateTime.MinValue, DateTime.MaxValue).Create();
 
-    public IEnumerable<DateTime> CreateMany() => CreateMany(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateTime> CreateMany() => CreateMany(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateTime> CreateMany(int amount)
     {
@@ -89,7 +89,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public DateTimeOffset CreateOffset() => Between(DateTimeOffset.MinValue, DateTimeOffset.MaxValue).Create();
 
-    public IEnumerable<DateTimeOffset> CreateManyOffset() => CreateManyOffset(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateTimeOffset> CreateManyOffset() => CreateManyOffset(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateTimeOffset> CreateManyOffset(int amount)
     {
@@ -99,7 +99,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public DateOnly CreateDateOnly() => Between(DateOnly.MinValue, DateOnly.MaxValue).Create();
 
-    public IEnumerable<DateOnly> CreateManyDateOnly() => CreateManyDateOnly(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateOnly> CreateManyDateOnly() => CreateManyDateOnly(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateOnly> CreateManyDateOnly(int amount)
     {
@@ -126,7 +126,7 @@ internal sealed class DummyDateTimeBuilderLastStep : IDummyDateTimeBuilderLastSt
 
     public DateTime Create() => _factory();
 
-    public IEnumerable<DateTime> CreateMany() => CreateMany(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateTime> CreateMany() => CreateMany(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateTime> CreateMany(int amount)
     {
@@ -153,7 +153,7 @@ internal sealed class DummyDateTimeOffsetBuilderLastStep : IDummyDateTimeOffsetB
 
     public DateTimeOffset Create() => _factory();
 
-    public IEnumerable<DateTimeOffset> CreateMany() => CreateMany(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateTimeOffset> CreateMany() => CreateMany(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateTimeOffset> CreateMany(int amount)
     {
@@ -180,7 +180,7 @@ internal sealed class DummyDateOnlyBuilder : IDummyDateOnlyBuilder
 
     public DateOnly Create() => _factory();
 
-    public IEnumerable<DateOnly> CreateMany() => CreateMany(Dummy.GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<DateOnly> CreateMany() => CreateMany(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<DateOnly> CreateMany(int amount)
     {

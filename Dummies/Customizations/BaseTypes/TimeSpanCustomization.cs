@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class TimeSpanCustomization : CustomizationBase<TimeSpan>
 {
-    public override IDummyBuilder<TimeSpan> Build(Dummy dummy)
+    public override IDummyBuilder<TimeSpan> Build(IDummy dummy)
     {
         return dummy.Build<TimeSpan>().FromFactory(() =>
         {

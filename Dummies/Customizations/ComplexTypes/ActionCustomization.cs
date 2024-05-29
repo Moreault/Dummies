@@ -1,9 +1,9 @@
 ﻿namespace ToolBX.Dummies.Customizations.ComplexTypes;
 
 [AutoCustomization]
-public sealed class ActionCustomization : ICustomization
+public sealed class ActionCustomization : CustomizationBase
 {
-    public IEnumerable<Type> Types { get; } =
+    protected override IEnumerable<Type> Types =>
     [
         typeof(Action),
         typeof(Action<>),
@@ -24,7 +24,7 @@ public sealed class ActionCustomization : ICustomization
         typeof(Action<,,,,,,,,,,,,,,,>),
     ];
 
-    public IDummyBuilder Build(Dummy dummy, Type type)
+    protected override IDummyBuilder BuildMe(IDummy dummy, Type type)
     {
         return dummy.Build<object>().FromFactory(() =>
         {

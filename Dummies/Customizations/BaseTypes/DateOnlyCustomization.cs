@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class DateOnlyCustomization : CustomizationBase<DateOnly>
 {
-    public override IDummyBuilder<DateOnly> Build(Dummy dummy)
+    public override IDummyBuilder<DateOnly> Build(IDummy dummy)
     {
         return dummy.Build<DateOnly>().FromFactory(() =>
         {

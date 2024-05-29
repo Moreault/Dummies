@@ -3,7 +3,7 @@
 [AutoCustomization]
 public sealed class GenericStackCustomization : GenericStackCustomizationBase
 {
-    public override IEnumerable<Type> Types => [typeof(Stack<>)];
+    protected override IEnumerable<Type> Types => [typeof(Stack<>)];
     
     //TODO Use OPEX 3.0.0's ToStack method
     protected override object Convert<T>(IEnumerable<T> source)

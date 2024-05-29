@@ -3,11 +3,11 @@
 [AutoCustomization]
 public sealed class ArrayCustomization : ArrayCustomizationBase
 {
-    public override IEnumerable<Type> Types { get; } = [typeof(Array)];
+    protected override IEnumerable<Type> Types { get; } = [typeof(Array)];
 
     protected override object Convert<T>(IEnumerable<T> source) => source.ToArray();
 
-    protected override object CreateMultiDimensionalArray(Dummy dummy, Type arrayType, Type elementType)
+    protected override object CreateMultiDimensionalArray(IDummy dummy, Type arrayType, Type elementType)
     {
         var rank = arrayType.GetArrayRank();
         var lengths = new int[rank];
@@ -22,7 +22,7 @@ public sealed class ArrayCustomization : ArrayCustomizationBase
         return array;
     }
 
-    private void PopulateMultiDimensionalArray(Dummy dummy, Array array, Type elementType, int[] indices, int dimension)
+    private void PopulateMultiDimensionalArray(IDummy dummy, Array array, Type elementType, int[] indices, int dimension)
     {
         if (dimension == indices.Length)
         {

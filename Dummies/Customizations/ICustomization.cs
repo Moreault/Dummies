@@ -2,11 +2,12 @@
 
 public interface ICustomization
 {
-    IEnumerable<Type> Types { get; }
-    IDummyBuilder Build(Dummy dummy, Type type);
+    Func<Type, bool> Condition { get; }
+    //IEnumerable<Type> Types { get; }
+    IDummyBuilder Build(IDummy dummy, Type type);
 }
 
 public interface ICustomization<T> : ICustomization
 {
-    IDummyBuilder<T> Build(Dummy dummy);
+    IDummyBuilder<T> Build(IDummy dummy);
 }

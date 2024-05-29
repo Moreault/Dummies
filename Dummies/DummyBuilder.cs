@@ -21,6 +21,12 @@ public interface IDummyBuilder<T> : IDummyBuilder
     /// </summary>
     IDummyBuilder<T> WithoutCustomizations();
 
+    /// <summary>
+    /// All properties with a public setter (or init) and public fields will not be set automatically if left unspecified.
+    /// This is equivalent to calling <see cref="Without{TMember}"/> on every single property or field.
+    /// </summary>
+    IDummyBuilder<T> WithoutAutoProperties();
+
     //TODO Make sure that properties are not automatically set (unless explicitly specified in the _memberValues) when using a factory.
     //TODO Or perhaps have FromFactoryOnly which does that?
     IDummyBuilder<T> FromFactory(Func<T> factory);
@@ -42,7 +48,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     // ReSharper disable once InconsistentNaming
     private static readonly Lazy<ImmutableList<ICustomization>> _autoCustomizations = new(() => Types.Where(x => x.HasAttribute<AutoCustomizationAttribute>() && !x.IsAbstract && x.Implements<ICustomization>()).Select(x => (ICustomization)Activator.CreateInstance(x)!).ToImmutableList());
 
-    private readonly Dummy _dummy;
+    private readonly DepthGuardDummy _dummy;
 
     private readonly List<MemberValuePair> _memberValues = new();
 
@@ -50,9 +56,20 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private Func<T>? _factory;
 
-    internal DummyBuilder(Dummy dummy)
+    private bool _withoutAutoProperties;
+
+    //private int _currentDepth;
+
+    internal DummyBuilder(Dummy dummy, int currentDepth = 0)
+    {
+        _dummy = new DepthGuardDummy(dummy, currentDepth) ?? throw new ArgumentNullException(nameof(dummy));
+        //_currentDepth = currentDepth;
+    }
+
+    internal DummyBuilder(DepthGuardDummy dummy)
     {
         _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
+
     }
 
     public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember? value)
@@ -94,6 +111,12 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
+    public IDummyBuilder<T> WithoutAutoProperties()
+    {
+        _withoutAutoProperties = true;
+        return this;
+    }
+
     public IDummyBuilder<T> FromFactory(Func<T> factory)
     {
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
@@ -113,6 +136,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         var casted = new DummyBuilder<T2>(_dummy);
         casted._memberValues.AddRange(_memberValues);
         casted._usesCustomizations = _usesCustomizations;
+        casted._withoutAutoProperties = _withoutAutoProperties;
         casted._factory = _factory is not null ? () => (T2)(object)_factory() : null;
         return casted;
     }
@@ -123,14 +147,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private ICustomization? FindCustomization(Type type)
     {
-        var customization = _dummy.Customizations.SingleOrDefault(x => x.Types.Contains(type)) ??
-               AutoCustomizations.SingleOrDefault(x => x.Types.Contains(type)) ??
-               (type.IsGenericType ? AutoCustomizations.SingleOrDefault(x => x.Types.Contains(type.GetGenericTypeDefinition())) : null);
-
-        if (customization == null && type.IsArray)
-            customization = AutoCustomizations.SingleOrDefault(x => x.Types.Any(t => t == typeof(Array)));
-
-        return customization;
+        return _dummy.Customizations.SingleOrDefault(x => x.Condition(type)) ??
+               AutoCustomizations.SingleOrDefault(x => x.Condition(type)) ??
+               (type.IsGenericType ? AutoCustomizations.SingleOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
     }
 
     public IEnumerable<T> CreateMany(int amount = 3)
@@ -140,13 +159,12 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
         var customization = FindCustomization<T>();
         IDummyBuilder<T> customizationBuilder = null!;
-        if (customization is ICustomization<T> typedCustomization)
-            customizationBuilder = typedCustomization.Build(_dummy);
-        else if (customization is not null)
+        if (customization is not null)
             customizationBuilder = customization.Build(_dummy, typeof(T)).As<T>();
 
         if (customizationBuilder is DummyBuilder<T> concreteBuilder)
         {
+            _withoutAutoProperties = concreteBuilder._withoutAutoProperties;
             var originals = _memberValues.ToList();
             var customizations = concreteBuilder._memberValues.ToList();
             _memberValues.AddRange(customizations);
@@ -156,53 +174,65 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 _factory = concreteBuilder._factory;
         }
 
+        var deeperDummy = _dummy.Deeper();
+
         var output = new List<T>();
         for (var i = 0; i < amount; i++)
         {
-            T instance;
-            if (_factory is null)
+            T instance = default!;
+            if (_dummy.CurrentDepth < DummyOptions.Global.MaximumDepth)
             {
-                if (typeof(T).IsAbstract)
+                if (_factory is null)
                 {
-                    instance = DynamicObjectGenerator.From<T>();
-                }
-                else if (typeof(T).IsEnum)
-                {
-                    var hasExclusions = _dummy.EnumExclusions.TryGetValue(typeof(T), out var exclusions);
-                    var possibleValues = hasExclusions ?
-                        Enum.GetValues(typeof(T)).Cast<T>().Where(x => !exclusions!.Contains(x!)).ToArray() :
-                        Enum.GetValues(typeof(T)).Cast<T>().ToArray();
-                    instance = possibleValues.GetRandom();
+                    if (typeof(T).IsAbstract)
+                    {
+                        instance = DynamicObjectGenerator.From<T>();
+                    }
+                    else if (typeof(T).IsEnum)
+                    {
+                        var hasExclusions = _dummy.EnumExclusions.TryGetValue(typeof(T), out var exclusions);
+                        var possibleValues = hasExclusions
+                            ? Enum.GetValues(typeof(T)).Cast<T>().Where(x => !exclusions!.Contains(x!)).ToArray()
+                            : Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+                        instance = possibleValues.GetRandom();
+                    }
+                    else
+                    {
+                        //TODO Support creating types that have constructors no matter how complex
+                        var constructor = typeof(T).GetConstructors().Where(x => x.IsInstance())
+                            .OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic).First();
+
+                        instance = (T)constructor.Invoke(constructor.GetParameters()
+                            .Select(x => deeperDummy.Create(x.ParameterType)).ToArray());
+                    }
                 }
                 else
                 {
-                    //TODO Support creating types that have constructors no matter how complex
-                    var constructor = typeof(T).GetConstructors().Where(x => x.IsInstance()).OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic).First();
-
-                    instance = (T)constructor.Invoke(constructor.GetParameters().Select(x => _dummy.Create(x.ParameterType)).ToArray());
+                    instance = _factory();
                 }
-            }
-            else
-            {
-                instance = _factory();
-            }
 
-            foreach (var property in typeof(T).GetAllProperties(x => x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic && !x.IsIndexer()))
-            {
-                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == property);
-                if (memberValue is null)
-                    property.SetValue(instance, _dummy.Create(property.PropertyType));
-                else if (_factory is null)
-                    property.SetValue(instance, memberValue.Value);
-            }
+                foreach (var property in typeof(T).GetAllProperties(x =>
+                             x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
+                             !x.IsIndexer()))
+                {
+                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == property);
+                    if (memberValue is null)
+                    {
+                        if (!_withoutAutoProperties)
+                            property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                    }
+                    else if (_factory is null)
+                        property.SetValue(instance, memberValue.Value);
+                }
 
-            foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
-            {
-                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == field);
-                if (memberValue is null)
-                    field.SetValue(instance, _dummy.Create(field.FieldType));
-                else if (_factory is null)
-                    field.SetValue(instance, memberValue.Value);
+                foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
+                {
+                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == field);
+                    if (memberValue is null)
+                        field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                    else if (_factory is null)
+                        field.SetValue(instance, memberValue.Value);
+                }
             }
 
             output.Add(instance);

@@ -3,5 +3,5 @@
 [AutoCustomization]
 public sealed class StringCustomization : CustomizationBase<string>
 {
-    public override IDummyBuilder<string> Build(Dummy dummy) => dummy.Build<string>().FromFactory(() => Guid.NewGuid().ToString());
+    public override IDummyBuilder<string> Build(IDummy dummy) => dummy.Build<string>().FromFactory(() => Guid.NewGuid().ToString());
 }

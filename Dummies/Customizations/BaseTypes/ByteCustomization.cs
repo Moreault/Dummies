@@ -3,5 +3,5 @@
 [AutoCustomization]
 public sealed class ByteCustomization : CustomizationBase<byte>
 {
-    public override IDummyBuilder<byte> Build(Dummy dummy) => dummy.Build<byte>().FromFactory(() => dummy.TryGenerateUnique<byte>(1, byte.MaxValue));
+    public override IDummyBuilder<byte> Build(IDummy dummy) => dummy.Build<byte>().FromFactory(() => dummy.Number.Between<byte>(1, byte.MaxValue).Create());
 }

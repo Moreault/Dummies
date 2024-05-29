@@ -1,10 +1,28 @@
 ﻿namespace ToolBX.Dummies.Customizations;
 
-public abstract class CustomizationBase<T> : ICustomization<T>
+public abstract class CustomizationBase : ICustomization
 {
-    public virtual IEnumerable<Type> Types => new[] { typeof(T) };
+    public Func<Type, bool> Condition => type => Types.Contains(type);
 
-    IDummyBuilder ICustomization.Build(Dummy dummy, Type type) => Build(dummy);
+    protected abstract IEnumerable<Type> Types { get; }
 
-    public abstract IDummyBuilder<T> Build(Dummy dummy);
+    public IDummyBuilder Build(IDummy dummy, Type type)
+    {
+        if (dummy is null) throw new ArgumentNullException(nameof(dummy));
+        if (type is null) throw new ArgumentNullException(nameof(type));
+        return BuildMe(dummy, type);
+    }
+
+    protected abstract IDummyBuilder BuildMe(IDummy dummy, Type type);
+}
+
+public abstract class CustomizationBase<T> : CustomizationBase
+{
+    protected override IEnumerable<Type> Types => AdditionalTypes.Concat(typeof(T));
+
+    protected virtual IEnumerable<Type> AdditionalTypes { get; } = [];
+
+    protected override IDummyBuilder BuildMe(IDummy dummy, Type type) => Build(dummy);
+
+    public abstract IDummyBuilder<T> Build(IDummy dummy);
 }

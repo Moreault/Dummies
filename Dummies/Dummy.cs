@@ -38,8 +38,7 @@ public interface IDummy
 
 public sealed class Dummy : IDummy
 {
-    public static DummyOptions GlobalOptions { get; } = new();
-
+    internal IReadOnlyList<long> GeneratedNumbers => _generatedNumbers;
     private readonly List<long> _generatedNumbers = new();
 
     internal List<ICustomization> Customizations { get; } = new();
@@ -54,25 +53,33 @@ public sealed class Dummy : IDummy
 
     public T Create<T>() => Build<T>().Create();
 
-    public object Create(Type type)
+    internal T Create<T>(int currentDepth) => new DummyBuilder<T>(this, currentDepth).Create();
+
+    public object Create(Type type) => Create(type, 0);
+
+    internal object Create(Type type, int currentDepth)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
-        return typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.ContainsGenericParameters).MakeGenericMethod(type).Invoke(this, Array.Empty<object>())!;
+        return typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.IsInternal() && x.ContainsGenericParameters).MakeGenericMethod(type).Invoke(this, [currentDepth])!;
     }
 
-    public IEnumerable<T> CreateMany<T>() => CreateMany<T>(GlobalOptions.DefaultCollectionSize);
+    public IEnumerable<T> CreateMany<T>() => CreateMany<T>(DummyOptions.Global.DefaultCollectionSize);
 
     public IEnumerable<T> CreateMany<T>(int amount) => Build<T>().CreateMany(amount);
 
-    public IEnumerable<object> CreateMany(Type type) => CreateMany(type, GlobalOptions.DefaultCollectionSize);
+    internal IEnumerable<T> CreateMany<T>(int amount, int currentDepth) => new DummyBuilder<T>(this, currentDepth).CreateMany(amount);
 
-    public IEnumerable<object> CreateMany(Type type, int amount)
+    public IEnumerable<object> CreateMany(Type type) => CreateMany(type, DummyOptions.Global.DefaultCollectionSize);
+
+    public IEnumerable<object> CreateMany(Type type, int amount) => CreateMany(type, amount, 0);
+
+    internal IEnumerable<object> CreateMany(Type type, int amount, int currentDepth)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
 
         var results = new List<object>();
         for (var i = 0; i < amount; i++)
-            results.Add(Create(type));
+            results.Add(Create(type, currentDepth));
         return results;
     }
 
@@ -98,31 +105,14 @@ public sealed class Dummy : IDummy
         return this;
     }
 
-    internal T TryGenerateUnique<T>(T min, T max, int attempts = 5) where T : INumber<T>
+    internal bool TryGenerate<T>(T value) where T : INumber<T>
     {
-        //TODO Proper message
-        if (min >= max) throw new ArgumentException();
-
-        if (attempts <= 0)
-            attempts = 1;
-
-        var generated = PseudoRandomNumberGenerator.Shared.Generate(min, max);
-        for (var i = 0; i < attempts; i++)
+        var value64 = long.CreateSaturating(value);
+        if (!_generatedNumbers.Contains(value64))
         {
-            var generated64 = long.CreateSaturating(generated);
-            if (!_generatedNumbers.Contains(generated64))
-            {
-                _generatedNumbers.Add(generated64);
-            }
+            _generatedNumbers.Add(value64);
+            return true;
         }
-        return generated;
-    }
-
-    internal T GenerateFloatingPoint<T>(T min, T max, int maxDigits = 3) where T : IFloatingPoint<T>
-    {
-        var integer = PseudoRandomNumberGenerator.Shared.Generate(min, max);
-        var floating = PseudoRandomNumberGenerator.Shared.GenerateFractions<T>();
-        var clamped = T.Clamp(integer + floating, min, max);
-        return T.Round(clamped, maxDigits);
+        return false;
     }
 }

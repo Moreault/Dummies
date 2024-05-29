@@ -2,7 +2,7 @@
 
 public abstract class ListCustomizationBase : GenericCollectionCustomizationBase
 {
-    protected override object Factory(Dummy dummy, Type type)
+    protected override object Factory(IDummy dummy, Type type)
     {
         var genericType = type.GetGenericArguments().Single();
         var list = CreateEnumerable(dummy, genericType);
