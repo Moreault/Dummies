@@ -8,7 +8,7 @@ public abstract class ArrayCustomizationBase : ICustomization
 
     public IDummyBuilder Build(IDummy dummy, Type type)
     {
-        return dummy.Build<object>().WithoutAutoProperties().FromFactory(() =>
+        return dummy.Build<object>().FromFactoryOnly(() =>
         {
             var elementType = type.GetElementType()!;
             var dimensions = type.IsArray ? type.GetArrayRank() : 1;

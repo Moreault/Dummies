@@ -43,7 +43,7 @@ internal sealed class DummyStringBuilder : IDummyStringBuilder
         return sb.ToString();
     }
 
-    public IEnumerable<string> CreateMany() => CreateMany(DummyOptions.Global.DefaultCollectionSize);
+    public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
 
     public IEnumerable<string> CreateMany(int amount)
     {

@@ -27,9 +27,15 @@ public interface IDummyBuilder<T> : IDummyBuilder
     /// </summary>
     IDummyBuilder<T> WithoutAutoProperties();
 
-    //TODO Make sure that properties are not automatically set (unless explicitly specified in the _memberValues) when using a factory.
-    //TODO Or perhaps have FromFactoryOnly which does that?
+    /// <summary>
+    /// Specifies how to create the object. Use this when <see cref="Dummy"/> can't create an object on its own.
+    /// </summary>
     IDummyBuilder<T> FromFactory(Func<T> factory);
+
+    /// <summary>
+    /// Specifies how to create the object without setting any values automatically. Use this when <see cref="Dummy"/> can't create an object on its own.
+    /// </summary>
+    IDummyBuilder<T> FromFactoryOnly(Func<T> factory);
 
     /// <summary>
     /// Excludes the specified values from being generated for the specified enum type.
@@ -50,7 +56,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private readonly DepthGuardDummy _dummy;
 
-    private readonly List<MemberValuePair> _memberValues = new();
+    private readonly List<MemberValuePair> _memberValues = [];
 
     private bool _usesCustomizations = true;
 
@@ -89,6 +95,15 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
+    public IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member)
+    {
+        if (member is null) throw new ArgumentNullException(nameof(member));
+        var memberExpression = GetMemberExpression(member.Body);
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, null));
+        return this;
+    }
+
+
     private MemberExpression GetMemberExpression(Expression body)
     {
         if (body is MemberExpression member)
@@ -103,7 +118,6 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         throw new ArgumentException();
     }
 
-    public IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member) => With(member, default(TMember)!);
 
     public IDummyBuilder<T> WithoutCustomizations()
     {
@@ -122,6 +136,8 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
     }
+
+    public IDummyBuilder<T> FromFactoryOnly(Func<T> factory) => WithoutAutoProperties().FromFactory(factory);
 
     public IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => Exclude(values as IEnumerable<TEnum>);
 
@@ -180,7 +196,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         for (var i = 0; i < amount; i++)
         {
             T instance = default!;
-            if (_dummy.CurrentDepth < DummyOptions.Global.MaximumDepth)
+            if (_dummy.CurrentDepth < _dummy.Options.MaximumDepth)
             {
                 if (_factory is null)
                 {
@@ -221,7 +237,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                         if (!_withoutAutoProperties)
                             property.SetValue(instance, deeperDummy.Create(property.PropertyType));
                     }
-                    else if (_factory is null)
+                    else if (memberValue.Value is not null)
                         property.SetValue(instance, memberValue.Value);
                 }
 
@@ -229,8 +245,11 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 {
                     var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == field);
                     if (memberValue is null)
-                        field.SetValue(instance, deeperDummy.Create(field.FieldType));
-                    else if (_factory is null)
+                    {
+                        if (!_withoutAutoProperties)
+                            field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                    }
+                    else if (memberValue.Value is not null)
                         field.SetValue(instance, memberValue.Value);
                 }
             }

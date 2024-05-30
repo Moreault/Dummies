@@ -8,6 +8,7 @@ internal sealed class DepthGuardDummy : IDummy
     internal IReadOnlyList<ICustomization> Customizations => _dummy.Customizations;
     internal IReadOnlyDictionary<Type, List<object>> EnumExclusions => _dummy.EnumExclusions;
 
+    public DummyOptions Options => _dummy.Options;
     public IDummyNumberBuilder Number => _dummy.Number;
     public IDummyDateTimeBuilder Date => _dummy.Date;
     public IDummyStringBuilder String => _dummy.String;
@@ -22,11 +23,11 @@ internal sealed class DepthGuardDummy : IDummy
 
     public object Create(Type type) => _dummy.Create(type, CurrentDepth);
 
-    public IEnumerable<T> CreateMany<T>() => _dummy.CreateMany<T>(DummyOptions.Global.DefaultCollectionSize, CurrentDepth);
+    public IEnumerable<T> CreateMany<T>() => _dummy.CreateMany<T>(_dummy.Options.DefaultCollectionSize, CurrentDepth);
 
     public IEnumerable<T> CreateMany<T>(int amount) => _dummy.CreateMany<T>(amount, CurrentDepth);
 
-    public IEnumerable<object> CreateMany(Type type) => _dummy.CreateMany(type, DummyOptions.Global.DefaultCollectionSize, CurrentDepth);
+    public IEnumerable<object> CreateMany(Type type) => _dummy.CreateMany(type, _dummy.Options.DefaultCollectionSize, CurrentDepth);
 
     public IEnumerable<object> CreateMany(Type type, int amount) => _dummy.CreateMany(type, amount, CurrentDepth);
 

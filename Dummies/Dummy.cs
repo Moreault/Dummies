@@ -2,6 +2,8 @@
 
 public interface IDummy
 {
+    DummyOptions Options { get; }
+
     /// <summary>
     /// Generates unique random numbers bypassing all number <see cref="ICustomization"/>s.
     /// </summary>
@@ -38,12 +40,13 @@ public interface IDummy
 
 public sealed class Dummy : IDummy
 {
-    internal IReadOnlyList<long> GeneratedNumbers => _generatedNumbers;
-    private readonly List<long> _generatedNumbers = new();
+    private readonly List<long> _generatedNumbers = [];
 
-    internal List<ICustomization> Customizations { get; } = new();
+    internal List<ICustomization> Customizations { get; } = [];
 
     internal readonly Dictionary<Type, List<object>> EnumExclusions = new();
+
+    public DummyOptions Options { get; } = new();
 
     public IDummyNumberBuilder Number => new DummyNumberBuilder(this);
 
@@ -63,13 +66,13 @@ public sealed class Dummy : IDummy
         return typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.IsInternal() && x.ContainsGenericParameters).MakeGenericMethod(type).Invoke(this, [currentDepth])!;
     }
 
-    public IEnumerable<T> CreateMany<T>() => CreateMany<T>(DummyOptions.Global.DefaultCollectionSize);
+    public IEnumerable<T> CreateMany<T>() => CreateMany<T>(Options.DefaultCollectionSize);
 
     public IEnumerable<T> CreateMany<T>(int amount) => Build<T>().CreateMany(amount);
 
     internal IEnumerable<T> CreateMany<T>(int amount, int currentDepth) => new DummyBuilder<T>(this, currentDepth).CreateMany(amount);
 
-    public IEnumerable<object> CreateMany(Type type) => CreateMany(type, DummyOptions.Global.DefaultCollectionSize);
+    public IEnumerable<object> CreateMany(Type type) => CreateMany(type, Options.DefaultCollectionSize);
 
     public IEnumerable<object> CreateMany(Type type, int amount) => CreateMany(type, amount, 0);
 
@@ -99,8 +102,7 @@ public sealed class Dummy : IDummy
     public IDummy Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum
     {
         var exclusions = EnumExclusions.TryGetValue(typeof(TEnum), out var list) ? list : [];
-        foreach (var value in values)
-            exclusions.Add(value);
+        exclusions.AddRange(values.Cast<object>());
         EnumExclusions[typeof(TEnum)] = exclusions;
         return this;
     }
@@ -108,11 +110,10 @@ public sealed class Dummy : IDummy
     internal bool TryGenerate<T>(T value) where T : INumber<T>
     {
         var value64 = long.CreateSaturating(value);
-        if (!_generatedNumbers.Contains(value64))
-        {
-            _generatedNumbers.Add(value64);
-            return true;
-        }
-        return false;
+        if (_generatedNumbers.Contains(value64)) 
+            return false;
+
+        _generatedNumbers.Add(value64);
+        return true;
     }
 }

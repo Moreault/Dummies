@@ -4,7 +4,7 @@ public abstract class GenericCollectionCustomizationBase : CustomizationBase
 {
     protected override IDummyBuilder BuildMe(IDummy dummy, Type type)
     {
-        return dummy.Build<object>().WithoutAutoProperties().FromFactory(() => Factory(dummy, type));
+        return dummy.Build<object>().FromFactoryOnly(() => Factory(dummy, type));
     }
 
     protected abstract object Factory(IDummy dummyGenerator, Type type);

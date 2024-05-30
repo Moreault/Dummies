@@ -13,8 +13,7 @@ public sealed class ArrayCustomization : ArrayCustomizationBase
         var lengths = new int[rank];
         for (var i = 0; i < rank; i++)
         {
-            //TODO Parameter value '3' somewhere as an option
-            lengths[i] = 3;
+            lengths[i] = dummy.Options.DefaultCollectionSize;
         }
 
         var array = Array.CreateInstance(elementType, lengths);
