@@ -178,4 +178,27 @@ public class DummyTests : Tester
         //Assert
         result.Friend.Friend.Friend.Should().BeNull();
     }
+
+    public sealed class GarbageWithPrivateConstructor
+    {
+        public int Id { get; }
+
+        private GarbageWithPrivateConstructor(int id)
+        {
+            Id = id;
+        }
+    }
+
+    [TestMethod]
+    public void Create_WhenTypeOnlyHasPrivateConstructor_Create()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Create<GarbageWithPrivateConstructor>();
+
+        //Assert
+        result.Should().NotBeNull();
+        result.Id.Should().BeGreaterThan(0);
+    }
 }

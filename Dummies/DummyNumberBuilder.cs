@@ -52,8 +52,7 @@ internal sealed class DummyNumberBuilder : IDummyNumberBuilder
 
     private T TryGenerateUnique<T>(T min, T max, int attempts = 5) where T : INumber<T>
     {
-        //TODO Proper message
-        if (min >= max) throw new ArgumentException();
+        if (min >= max) throw new ArgumentException(string.Format(ExceptionMessages.MaxMustBeGreaterThanMin, min, max));
 
         if (attempts <= 0)
             attempts = 1;

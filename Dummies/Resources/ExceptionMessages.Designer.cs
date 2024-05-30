@@ -59,5 +59,41 @@ namespace ToolBX.Dummies.Resources {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amount must be greater than zero but its value was {0}.
+        /// </summary>
+        internal static string CannotCreateNegativeOrZeroObjects {
+            get {
+                return ResourceManager.GetString("CannotCreateNegativeOrZeroObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Instantiation {
+            get {
+                return ResourceManager.GetString("Instantiation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max must be greater than min but their values were {0} and {1}.
+        /// </summary>
+        internal static string MaxMustBeGreaterThanMin {
+            get {
+                return ResourceManager.GetString("MaxMustBeGreaterThanMin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expression type is not supported.
+        /// </summary>
+        internal static string MemberExpressionUnsupported {
+            get {
+                return ResourceManager.GetString("MemberExpressionUnsupported", resourceCulture);
+            }
+        }
     }
 }

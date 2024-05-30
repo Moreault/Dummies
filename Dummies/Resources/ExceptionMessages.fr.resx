@@ -98,4 +98,16 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="MemberExpressionUnsupported" xml:space="preserve">
+		<value>Le type d'expression n'est pas supporté</value>
+	</data>
+	<data name="CannotCreateNegativeOrZeroObjects" xml:space="preserve">
+		<value>Le nombre (amount) doit être plus grand que zéro mais sa valeur était {0}</value>
+	</data>
+	<data name="MaxMustBeGreaterThanMin" xml:space="preserve">
+		<value>Max doit être plus grand que min mais leurs valeurs étaient {0} et {1}</value>
+	</data>
+	<data name="Instantiation" xml:space="preserve">
+		<value>Le type '{0}' n'a pu être instantié. Utilisez une Customization pour guider Dummy.</value>
+	</data>
 </root>

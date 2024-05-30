@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
+using ToolBX.Dummies.Exceptions;
 using ToolBX.Dummies.Generation;
+using ToolBX.OutWarden;
 
 namespace ToolBX.Dummies;
 
@@ -30,12 +32,7 @@ public interface IDummyBuilder<T> : IDummyBuilder
     /// <summary>
     /// Specifies how to create the object. Use this when <see cref="Dummy"/> can't create an object on its own.
     /// </summary>
-    IDummyBuilder<T> FromFactory(Func<T> factory);
-
-    /// <summary>
-    /// Specifies how to create the object without setting any values automatically. Use this when <see cref="Dummy"/> can't create an object on its own.
-    /// </summary>
-    IDummyBuilder<T> FromFactoryOnly(Func<T> factory);
+    IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null);
 
     /// <summary>
     /// Excludes the specified values from being generated for the specified enum type.
@@ -64,12 +61,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private bool _withoutAutoProperties;
 
-    //private int _currentDepth;
-
     internal DummyBuilder(Dummy dummy, int currentDepth = 0)
     {
         _dummy = new DepthGuardDummy(dummy, currentDepth) ?? throw new ArgumentNullException(nameof(dummy));
-        //_currentDepth = currentDepth;
     }
 
     internal DummyBuilder(DepthGuardDummy dummy)
@@ -103,7 +97,6 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
-
     private MemberExpression GetMemberExpression(Expression body)
     {
         if (body is MemberExpression member)
@@ -114,10 +107,8 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         {
             return (MemberExpression)unaryExpression.Operand;
         }
-        //TODO Message
-        throw new ArgumentException();
+        throw new ArgumentException(ExceptionMessages.MemberExpressionUnsupported);
     }
-
 
     public IDummyBuilder<T> WithoutCustomizations()
     {
@@ -131,13 +122,15 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
-    public IDummyBuilder<T> FromFactory(Func<T> factory)
+    public IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null)
     {
+        options ??= FactoryOptions.Default;
+        if (!options.UseAutoProperties)
+            WithoutAutoProperties();
+
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
     }
-
-    public IDummyBuilder<T> FromFactoryOnly(Func<T> factory) => WithoutAutoProperties().FromFactory(factory);
 
     public IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => Exclude(values as IEnumerable<TEnum>);
 
@@ -170,8 +163,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     public IEnumerable<T> CreateMany(int amount = 3)
     {
-        //TODO Actual message
-        if (amount <= 0) throw new ArgumentException();
+        if (amount <= 0) throw new ArgumentException(string.Format(ExceptionMessages.CannotCreateNegativeOrZeroObjects, amount));
 
         var customization = FindCustomization<T>();
         IDummyBuilder<T> customizationBuilder = null!;
@@ -214,12 +206,14 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                     }
                     else
                     {
-                        //TODO Support creating types that have constructors no matter how complex
-                        var constructor = typeof(T).GetConstructors().Where(x => x.IsInstance())
-                            .OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic).First();
+                        var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
+                            .OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic);
 
-                        instance = (T)constructor.Invoke(constructor.GetParameters()
-                            .Select(x => deeperDummy.Create(x.ParameterType)).ToArray());
+                        var instantiation = TryInstantiate(deeperDummy, constructors);
+                        if (!instantiation.IsSuccess)
+                            throw new InstantiationException(typeof(T));
+
+                        instance = instantiation.Value;
                     }
                 }
                 else
@@ -258,5 +252,30 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         }
 
         return output;
+    }
+
+    private static Result<T> TryInstantiate(IDummy dummy, IEnumerable<ConstructorInfo> constructors)
+    {
+        foreach (var constructor in constructors)
+        {
+            var instantiation = TryInstantiate(dummy, constructor);
+            if (instantiation.IsSuccess)
+            {
+                return instantiation;
+            }
+        }
+        return Result<T>.Failure();
+    }
+
+    private static Result<T> TryInstantiate(IDummy dummy, ConstructorInfo constructor)
+    {
+        try
+        {
+            return Result<T>.Success((T)constructor.Invoke(constructor.GetParameters().Select(x => dummy.Create(x.ParameterType)).ToArray()));
+        }
+        catch
+        {
+            return Result<T>.Failure();
+        }
     }
 }
