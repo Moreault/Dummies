@@ -13,7 +13,8 @@ public interface IDummyBuilder
 public interface IDummyBuilder<T> : IDummyBuilder
 {
     T Create();
-    IEnumerable<T> CreateMany(int amount = 3);
+    IEnumerable<T> CreateMany();
+    IEnumerable<T> CreateMany(int amount);
     IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember value);
     IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<TMember> value);
     IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member);
@@ -161,7 +162,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                (type.IsGenericType ? AutoCustomizations.SingleOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
     }
 
-    public IEnumerable<T> CreateMany(int amount = 3)
+    public IEnumerable<T> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
+
+    public IEnumerable<T> CreateMany(int amount)
     {
         if (amount <= 0) throw new ArgumentException(string.Format(ExceptionMessages.CannotCreateNegativeOrZeroObjects, amount));
 
