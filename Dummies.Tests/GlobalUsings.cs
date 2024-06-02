@@ -6,3 +6,4 @@ global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using ToolBX.Dummies;
 global using ToolBX.Dummies.Exceptions;
 global using ToolBX.Dummies.Resources;
+global using ToolBX.Mathemancy;

@@ -1,6 +1,4 @@
-﻿using ToolBX.Mathemancy;
-
-namespace Dummies.Tests.Types;
+﻿namespace Dummies.Tests.Types;
 
 [TestClass]
 public sealed class Vector3OfFloatTests : Vector3Tester<float>;

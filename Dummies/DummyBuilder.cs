@@ -1,9 +1,4 @@
-﻿using System.Linq.Expressions;
-using ToolBX.Dummies.Exceptions;
-using ToolBX.Dummies.Generation;
-using ToolBX.OutWarden;
-
-namespace ToolBX.Dummies;
+﻿namespace ToolBX.Dummies;
 
 public interface IDummyBuilder
 {
@@ -190,7 +185,8 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         var output = new List<T>();
         for (var i = 0; i < amount; i++)
         {
-            T instance = default!;
+            //Needs to be boxed in case it's a struct so that modifications to its properties after instantiation are kept
+            object? instance = default(T)!;
             if (_dummy.CurrentDepth < _dummy.Options.MaximumDepth)
             {
                 if (_factory is null)
@@ -251,7 +247,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 }
             }
 
-            output.Add(instance);
+            output.Add((T)instance!);
         }
 
         return output;
