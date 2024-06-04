@@ -1,5 +1,3 @@
-using ToolBX.Dummies.Customizations;
-
 namespace Dummies.Tests;
 
 [TestClass]

@@ -152,9 +152,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private ICustomization? FindCustomization(Type type)
     {
-        return _dummy.Customizations.SingleOrDefault(x => x.Condition(type)) ??
-               AutoCustomizations.SingleOrDefault(x => x.Condition(type)) ??
-               (type.IsGenericType ? AutoCustomizations.SingleOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
+        var customizations = AutoCustomizations.Concat(_dummy.Customizations).ToArray();
+        return customizations.LastOrDefault(x => x.Condition(type)) ??
+               (type.IsGenericType ? customizations.LastOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
     }
 
     public IEnumerable<T> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
