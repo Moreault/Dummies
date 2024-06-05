@@ -224,7 +224,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                              x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
                              !x.IsIndexer()))
                 {
-                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == property);
+                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
                     if (memberValue is null)
                     {
                         if (!_withoutAutoProperties)
@@ -236,7 +236,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
                 foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
                 {
-                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo == field);
+                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
                     if (memberValue is null)
                     {
                         if (!_withoutAutoProperties)

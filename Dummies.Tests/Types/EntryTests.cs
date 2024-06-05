@@ -4,7 +4,22 @@
 public sealed class EntryTests : Tester
 {
     //Taken from ToolBX.Collections.Inventory
-    public sealed record Entry<T>
+    public sealed record Entry<T> : EntryBase<T>
+    {
+        public Entry()
+        {
+
+        }
+
+        public Entry(T item, int quantity = 1) : base(item, quantity)
+        {
+
+        }
+
+        public override string ToString() => base.ToString();
+    }
+
+    public abstract record EntryBase<T>
     {
         public T? Item { get; init; }
 
@@ -15,12 +30,12 @@ public sealed class EntryTests : Tester
         }
         private readonly int _quantity;
 
-        public Entry()
+        protected EntryBase()
         {
 
         }
 
-        public Entry(T item, int quantity = 1)
+        protected EntryBase(T item, int quantity = 1)
         {
             Item = item;
             Quantity = quantity;
@@ -35,7 +50,7 @@ public sealed class EntryTests : Tester
         public override string ToString() => $"{(Item is null ? "NULL" : Item.ToString())} x{Quantity}";
     }
 
-    public sealed record Garbage
+    public record Garbage
     {
         public int Id { get; init; }
         public string Name { get; init; } = string.Empty;
