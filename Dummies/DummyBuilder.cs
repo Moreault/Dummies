@@ -206,7 +206,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                     else
                     {
                         var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
-                            .OrderByDescending(x => x.GetParameters().Length).ThenBy(x => x.IsPublic);
+                            .OrderByDescending(x => x.IsPublic).ThenBy(x => x.GetParameters().Length);
 
                         var instantiation = TryInstantiate(deeperDummy, constructors);
                         if (!instantiation.IsSuccess)
