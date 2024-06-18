@@ -41,8 +41,9 @@ public sealed class FileFetchOptionsTests : Tester
         //Arrange
 
         //Act
-        var options = Dummy.Build<FileFetchOptions>().With(x => x.FileExtensions, ImmutableList<string>.Empty).Create();
+        var action = () => Dummy.Build<FileFetchOptions>().With(x => x.FileExtensions, ImmutableList<string>.Empty).Create();
 
         //Assert
+        action.Should().NotThrow();
     }
 }
