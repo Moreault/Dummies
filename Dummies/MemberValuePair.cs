@@ -22,7 +22,10 @@ internal sealed record MemberValuePair
                 value = method.Invoke(_value, []);
             }
 
-            return realType == valueType ? value : Convert.ChangeType(value, realType);
+            if (realType.IsAssignableFrom(valueType))
+                return value;
+
+            return Convert.ChangeType(value, realType);
         }
         init => _value = value;
     }
