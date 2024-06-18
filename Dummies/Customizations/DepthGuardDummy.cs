@@ -12,6 +12,8 @@ internal sealed class DepthGuardDummy : IDummy
     public IDummyNumberBuilder Number => _dummy.Number;
     public IDummyDateTimeBuilder Date => _dummy.Date;
     public IDummyStringBuilder String => _dummy.String;
+    public IDummyFileNameBuilder FileName => _dummy.FileName;
+    public IDummyPathBuilder Path => _dummy.Path;
 
     internal DepthGuardDummy(Dummy dummy, int currentDepth)
     {

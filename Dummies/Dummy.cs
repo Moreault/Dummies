@@ -5,19 +5,29 @@ public interface IDummy
     DummyOptions Options { get; }
 
     /// <summary>
-    /// Generates unique random numbers bypassing all number <see cref="ICustomization"/>s.
+    /// Generates custom numbers bypassing all number <see cref="ICustomization"/>s.
     /// </summary>
     IDummyNumberBuilder Number { get; }
 
     /// <summary>
-    /// Generates unique random date bypassing all DateTime <see cref="ICustomization"/>s.
+    /// Generates custom dates bypassing all DateTime <see cref="ICustomization"/>s.
     /// </summary>
     IDummyDateTimeBuilder Date { get; }
 
     /// <summary>
-    /// Generates unique random strings bypassing all string <see cref="ICustomization"/>s.
+    /// Generates custom strings bypassing all string <see cref="ICustomization"/>s.
     /// </summary>
     IDummyStringBuilder String { get; }
+
+    /// <summary>
+    /// Generates custom file names bypassing all string <see cref="ICustomization"/>s.
+    /// </summary>
+    IDummyFileNameBuilder FileName { get; }
+
+    /// <summary>
+    /// Generates custom paths bypassing all string <see cref="ICustomization"/>s.
+    /// </summary>
+    IDummyPathBuilder Path { get; }
 
     T Create<T>();
     object Create(Type type);
@@ -53,6 +63,10 @@ public sealed class Dummy : IDummy
     public IDummyDateTimeBuilder Date => new DummyDateTimeBuilder(this);
 
     public IDummyStringBuilder String => new DummyStringBuilder(this);
+
+    public IDummyFileNameBuilder FileName => new DummyFileNameBuilder(this);
+
+    public IDummyPathBuilder Path => new DummyPathBuilder(this);
 
     public T Create<T>() => Build<T>().Create();
 

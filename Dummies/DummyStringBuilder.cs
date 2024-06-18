@@ -19,37 +19,22 @@ public interface IDummyStringLengthBuilder
 
 internal sealed class DummyStringBuilder : IDummyStringBuilder
 {
-    private readonly Dummy _dummy;
+    private readonly IDummy _dummy;
 
     internal Func<int> Length = () => 24;
 
-    private const string LatinAlphabet = Characters.Letters + Characters.Numbers;
-
-    internal DummyStringBuilder(Dummy dummy)
+    internal DummyStringBuilder(IDummy dummy)
     {
         _dummy = dummy;
     }
 
     public IDummyStringLengthBuilder WithLength => new DummyStringLengthBuilder(this);
 
-    public string Create()
-    {
-        var length = Length();
-        var sb = new StringBuilder();
-        for (var i = 0; i < length; i++)
-        {
-            sb.Append(LatinAlphabet.GetRandom());
-        }
-        return sb.ToString();
-    }
+    public string Create() => RandomStringGenerator.Generate(Length());
 
     public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
 
-    public IEnumerable<string> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
-    }
+    public IEnumerable<string> CreateMany(int amount) => Enumerable.Repeat(Create(), amount);
 }
 
 internal sealed class DummyStringLengthBuilder : IDummyStringLengthBuilder

@@ -220,30 +220,33 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                     instance = _factory();
                 }
 
-                foreach (var property in typeof(T).GetAllProperties(x =>
-                             x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
-                             !x.IsIndexer()))
+                if (!typeof(T).IsEnum)
                 {
-                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
-                    if (memberValue is null)
+                    foreach (var property in typeof(T).GetAllProperties(x =>
+                                 x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
+                                 !x.IsIndexer()))
                     {
-                        if (!_withoutAutoProperties)
-                            property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
+                        if (memberValue is null)
+                        {
+                            if (!_withoutAutoProperties)
+                                property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                        }
+                        else if (memberValue.Value is not null)
+                            property.SetValue(instance, memberValue.Value);
                     }
-                    else if (memberValue.Value is not null)
-                        property.SetValue(instance, memberValue.Value);
-                }
 
-                foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
-                {
-                    var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
-                    if (memberValue is null)
+                    foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
                     {
-                        if (!_withoutAutoProperties)
-                            field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
+                        if (memberValue is null)
+                        {
+                            if (!_withoutAutoProperties)
+                                field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                        }
+                        else if (memberValue.Value is not null)
+                            field.SetValue(instance, memberValue.Value);
                     }
-                    else if (memberValue.Value is not null)
-                        field.SetValue(instance, memberValue.Value);
                 }
             }
 

@@ -67,7 +67,7 @@ public class DummyTests : Tester
         result.B.Should().Be(14);
     }
 
-    public enum BogusEnum
+    public enum GarbageEnum
     {
         A,
         B,
@@ -79,18 +79,30 @@ public class DummyTests : Tester
     }
 
     [TestMethod]
+    public void Create_WhenEnum_AlwaysCreateDefinedValueByDefault()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Create<GarbageEnum>();
+
+        //Assert
+        result.Should().BeDefined();
+    }
+
+    [TestMethod]
     public void WhenExcludingEnumValues_DoNotUseIt()
     {
         //Arrange
-        Dummy.Exclude(BogusEnum.C, BogusEnum.E, BogusEnum.G);
+        Dummy.Exclude(GarbageEnum.C, GarbageEnum.E, GarbageEnum.G);
 
         //Act
-        var result = Dummy.CreateMany<BogusEnum>(20);
+        var result = Dummy.CreateMany<GarbageEnum>(20);
 
         //Assert
-        result.Should().NotContain(BogusEnum.C);
-        result.Should().NotContain(BogusEnum.E);
-        result.Should().NotContain(BogusEnum.G);
+        result.Should().NotContain(GarbageEnum.C);
+        result.Should().NotContain(GarbageEnum.E);
+        result.Should().NotContain(GarbageEnum.G);
     }
 
     [TestMethod]
