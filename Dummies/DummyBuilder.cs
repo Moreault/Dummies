@@ -187,7 +187,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         {
             //Needs to be boxed in case it's a struct so that modifications to its properties after instantiation are kept
             object? instance = default(T)!;
-            if (_dummy.CurrentDepth < _dummy.Options.MaximumDepth)
+            if (_dummy.CurrentDepth <= _dummy.Options.MaximumDepth)
             {
                 if (_factory is null)
                 {
@@ -208,7 +208,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                         var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
                             .OrderByDescending(x => x.IsPublic).ThenBy(x => x.GetParameters().Length);
 
-                        var instantiation = TryInstantiate(deeperDummy, constructors);
+                        var instantiation = TryInstantiate(_dummy, constructors);
                         if (!instantiation.IsSuccess)
                             throw new InstantiationException(typeof(T));
 

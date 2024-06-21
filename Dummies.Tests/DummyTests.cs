@@ -186,7 +186,7 @@ public class DummyTests : Tester
         var result = Dummy.Create<RecursiveGarbage>();
 
         //Assert
-        result.Friend.Friend.Friend.Should().BeNull();
+        result.Friend.Friend.Friend.Friend.Should().BeNull();
     }
 
     public sealed class GarbageWithPrivateConstructor
