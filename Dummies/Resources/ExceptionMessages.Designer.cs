@@ -72,6 +72,15 @@ namespace ToolBX.Dummies.Resources {
         /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
+        internal static string FieldIsNotPublic {
+            get {
+                return ResourceManager.GetString("FieldIsNotPublic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; could not be instantiated automatically. Use a Customization to guide Dummy..
+        /// </summary>
         internal static string Instantiation {
             get {
                 return ResourceManager.GetString("Instantiation", resourceCulture);
@@ -93,6 +102,24 @@ namespace ToolBX.Dummies.Resources {
         internal static string MemberExpressionUnsupported {
             get {
                 return ResourceManager.GetString("MemberExpressionUnsupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no field or property {0} on type {1}.
+        /// </summary>
+        internal static string NoFieldOrPropertyWithName {
+            get {
+                return ResourceManager.GetString("NoFieldOrPropertyWithName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property {0} on {1} must have a public set or init accessor.
+        /// </summary>
+        internal static string PropertyMustBeMutable {
+            get {
+                return ResourceManager.GetString("PropertyMustBeMutable", resourceCulture);
             }
         }
     }

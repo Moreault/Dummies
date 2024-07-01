@@ -110,4 +110,13 @@
 	<data name="Instantiation" xml:space="preserve">
 		<value>Le type '{0}' n'a pu être instantié. Utilisez une Customization pour guider Dummy.</value>
 	</data>
+	<data name="PropertyMustBeMutable" xml:space="preserve">
+		<value>La propriété {0} sur le type {1} doit avoir un accesseur 'set' ou 'init' publique</value>
+	</data>
+	<data name="NoFieldOrPropertyWithName" xml:space="preserve">
+		<value>Il n'y a pas de champ ou de propriété avec le nom {0} sur le type {1}</value>
+	</data>
+	<data name="FieldIsNotPublic" xml:space="preserve">
+		<value>Le champ {0} sur le type {1} n'est pas publique</value>
+	</data>
 </root>

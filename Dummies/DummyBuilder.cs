@@ -72,6 +72,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     {
         if (member is null) throw new ArgumentNullException(nameof(member));
         var memberExpression = GetMemberExpression(member.Body);
+        ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
         _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
         return this;
     }
@@ -81,6 +82,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         if (member is null) throw new ArgumentNullException(nameof(member));
         if (value is null) throw new ArgumentNullException(nameof(value));
         var memberExpression = GetMemberExpression(member.Body);
+        ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
         _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
         return this;
     }
@@ -89,8 +91,29 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     {
         if (member is null) throw new ArgumentNullException(nameof(member));
         var memberExpression = GetMemberExpression(member.Body);
+        ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
         _memberValues.Add(new MemberValuePair(memberExpression.Member, null));
         return this;
+    }
+
+    private void ThrowIfMemberIsReadOnly(string memberName)
+    {
+        var property = typeof(T).GetSinglePropertyOrDefault(memberName);
+        if (property is not null)
+        {
+            if (property.SetMethod is null || !property.SetMethod.IsPublic)
+                throw new InvalidOperationException(string.Format(ExceptionMessages.PropertyMustBeMutable, memberName, typeof(T).GetHumanReadableName()));
+        }
+        else
+        {
+            var field = typeof(T).GetSingleFieldOrDefault(memberName);
+            if (field is null)
+                throw new InvalidOperationException(string.Format(ExceptionMessages.NoFieldOrPropertyWithName, memberName, typeof(T).GetHumanReadableName()));
+
+            if (!field.IsPublic)
+                throw new InvalidOperationException(string.Format(ExceptionMessages.FieldIsNotPublic, memberName, typeof(T).GetHumanReadableName()));
+        }
+
     }
 
     private MemberExpression GetMemberExpression(Expression body)

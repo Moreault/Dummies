@@ -116,4 +116,16 @@ public sealed class MarkupInfoTagTests : Tester
         //Assert
         action.Should().NotThrow();
     }
+
+    [TestMethod]
+    public void Create_WhenTryingToSetReadOnlyProperty_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Build<MarkupTagInfo>().With(x => x.Kind, TagKind.Opening).Create();
+
+        //Assert
+        action.Should().Throw<InvalidOperationException>().WithMessage(string.Format(ExceptionMessages.PropertyMustBeMutable, nameof(MarkupTagInfo.Kind), nameof(MarkupTagInfo)));
+    }
 }

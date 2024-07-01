@@ -15,6 +15,13 @@ internal sealed class UniversalInterceptor : IInterceptor
             {
                 invocation.ReturnValue = value;
             }
+            else
+            {
+                var returnType = invocation.Method.ReturnType;
+                var defaultValue = returnType.GetDefaultValue();
+                _propertyValues[propertyName] = defaultValue;
+                invocation.ReturnValue = defaultValue;
+            }
         }
         else if (methodName.StartsWith("set_", StringComparison.OrdinalIgnoreCase))
         {

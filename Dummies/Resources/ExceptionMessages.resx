@@ -110,4 +110,13 @@
 	<data name="Instantiation" xml:space="preserve">
 		<value>Type '{0}' could not be instantiated automatically. Use a Customization to guide Dummy.</value>
 	</data>
+	<data name="PropertyMustBeMutable" xml:space="preserve">
+		<value>Property {0} on {1} must have a public set or init accessor</value>
+	</data>
+	<data name="NoFieldOrPropertyWithName" xml:space="preserve">
+		<value>There is no field or property {0} on type {1}</value>
+	</data>
+	<data name="FieldIsNotPublic" xml:space="preserve">
+		<value>Field {0} on {1} is not public</value>
+	</data>
 </root>
