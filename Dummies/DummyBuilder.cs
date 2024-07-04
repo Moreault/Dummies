@@ -31,6 +31,16 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null);
 
     /// <summary>
+    /// Will create a random object from one of the given types.
+    /// </summary>
+    IDummyBuilder<T> FromTypes(IEnumerable<Type> types);
+
+    /// <summary>
+    /// Will create a random object from one of the given types.
+    /// </summary>
+    IDummyBuilder<T> FromTypes(params Type[] types);
+
+    /// <summary>
     /// Excludes the specified values from being generated for the specified enum type.
     /// </summary>
     IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum;
@@ -150,6 +160,14 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
     }
+
+    public IDummyBuilder<T> FromTypes(IEnumerable<Type> types)
+    {
+        if (types is null) throw new ArgumentNullException(nameof(types));
+        return FromFactory(() => (T)_dummy.Create(types.GetRandom()));
+    }
+
+    public IDummyBuilder<T> FromTypes(params Type[] types) => FromTypes(types as IEnumerable<Type>);
 
     public IDummyBuilder<T> Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => Exclude(values as IEnumerable<TEnum>);
 

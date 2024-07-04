@@ -87,8 +87,6 @@ public sealed class DummyBuilderTests : Tester
         result.Gold.Should().BeNegative();
     }
 
-
-
     [TestMethod]
     public void WhenUsingWithOnNegativeSByteAsFunc_ReturnActualNumberWithoutThrowing()
     {
@@ -159,5 +157,58 @@ public sealed class DummyBuilderTests : Tester
 
         //Assert
         result.Gold.Should().BeNegative();
+    }
+
+    public interface IGarbage;
+    public sealed record GarbageOne : IGarbage;
+    public sealed record GarbageTwo : IGarbage;
+    public sealed record GarbageThree : IGarbage;
+
+    [TestMethod]
+    public void FromTypes_WhenPassingNull_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Build<IGarbage>().FromTypes(null!);
+
+        //Assert
+        action.Should().Throw<ArgumentNullException>().WithParameterName("types");
+    }
+
+    [TestMethod]
+    public void FromTypes_WhenTypesIsEmpty_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Build<IGarbage>().FromTypes([]).Create();
+
+        //Assert
+        action.Should().Throw<ArgumentNullException>();
+    }
+
+    [TestMethod]
+    public void FromTypes_WhenContainsOnlyOneType_AlwaysCreateThatOneType()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<IGarbage>().FromTypes(typeof(GarbageTwo)).CreateMany(10).ToList();
+
+        //Assert
+        result.DistinctBy(x => x.GetType()).Count().Should().Be(1);
+    }
+
+    [TestMethod]
+    public void FromTypes_WhenContainsMultipleTypes_ReturnsARandomType()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<IGarbage>().FromTypes(typeof(GarbageOne), typeof(GarbageTwo), typeof(GarbageThree)).CreateMany(10).ToList();
+
+        //Assert
+        result.DistinctBy(x => x.GetType()).Count().Should().BeGreaterThan(1);
     }
 }
