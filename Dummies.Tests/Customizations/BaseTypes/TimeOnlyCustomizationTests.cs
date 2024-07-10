@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class TimeOnlyCustomizationTests : Tester
+public sealed class TimeOnlyCustomizationTests : CustomizationTester<TimeOnlyCustomization>
 {
     [TestMethod]
     public void Always_Generate()

@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.Collections;
 
 [TestClass]
-public sealed class ImmutableListCustomizationTests : Tester
+public sealed class ImmutableListCustomizationTests : CustomizationTester<ImmutableArrayCustomization>
 {
     [TestMethod]
     public void Always_CreateWithMutlipleElements()

@@ -45,7 +45,15 @@ public interface IDummy
     /// </summary>
     IDummy Exclude<TEnum>(params TEnum[] values) where TEnum : Enum;
 
+    /// <summary>
+    /// Excludes the specified values from being generated for the specified enum type.
+    /// </summary>
     IDummy Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum;
+
+    /// <summary>
+    /// Using <see cref="Create"/> on type <see cref="T"/> will always return the registered instance.
+    /// </summary>
+    void Register<T>(T? instance);
 }
 
 public sealed class Dummy : IDummy
@@ -55,6 +63,8 @@ public sealed class Dummy : IDummy
     internal List<ICustomization> Customizations { get; } = [];
 
     internal readonly Dictionary<Type, List<object>> EnumExclusions = new();
+
+    private readonly Dictionary<Type, object?> _registered = new();
 
     public DummyOptions Options { get; } = new();
 
@@ -68,9 +78,20 @@ public sealed class Dummy : IDummy
 
     public IDummyPathBuilder Path => new DummyPathBuilder(this);
 
-    public T Create<T>() => Build<T>().Create();
+    public T Create<T>()
+    {
+        if (_registered.TryGetValue(typeof(T), out var value))
+            return (T)value!;
 
-    internal T Create<T>(int currentDepth) => new DummyBuilder<T>(this, currentDepth).Create();
+        return Build<T>().Create();
+    }
+
+    internal T Create<T>(int currentDepth)
+    {
+        if (_registered.TryGetValue(typeof(T), out var value))
+            return (T)value!;
+        return new DummyBuilder<T>(this, currentDepth).Create();
+    }
 
     public object Create(Type type) => Create(type, 0);
 
@@ -82,7 +103,13 @@ public sealed class Dummy : IDummy
 
     public IEnumerable<T> CreateMany<T>() => CreateMany<T>(Options.DefaultCollectionSize);
 
-    public IEnumerable<T> CreateMany<T>(int amount) => Build<T>().CreateMany(amount);
+    public IEnumerable<T> CreateMany<T>(int amount)
+    {
+        if (_registered.TryGetValue(typeof(T), out var value))
+            return Enumerable.Repeat((T)value!, amount);
+
+        return Build<T>().CreateMany(amount);
+    }
 
     internal IEnumerable<T> CreateMany<T>(int amount, int currentDepth) => new DummyBuilder<T>(this, currentDepth).CreateMany(amount);
 
@@ -93,6 +120,7 @@ public sealed class Dummy : IDummy
     internal IEnumerable<object> CreateMany(Type type, int amount, int currentDepth)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
+        ArgumentOutOfRangeException.ThrowIfNegative(amount, nameof(amount));
 
         var results = new List<object>();
         for (var i = 0; i < amount; i++)
@@ -120,6 +148,8 @@ public sealed class Dummy : IDummy
         EnumExclusions[typeof(TEnum)] = exclusions;
         return this;
     }
+
+    public void Register<T>(T? instance) => _registered[typeof(T)] = instance;
 
     internal bool TryGenerate<T>(T value) where T : INumber<T>
     {

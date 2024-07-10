@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.Collections;
 
 [TestClass]
-public sealed class ArrayCustomizationTests : Tester
+public sealed class ArrayCustomizationTests : CustomizationTester<ArrayCustomization>
 {
     [TestMethod]
     public void WhenIsOneDimensional_CreateWithMultipleElements()

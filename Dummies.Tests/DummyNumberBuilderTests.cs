@@ -50,6 +50,19 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
     }
 
     [TestMethod]
+    public void LessThanWithoutAmount_Always_ReturnNumbersThatAreLessThanValue()
+    {
+        //Arrange
+        var value = T.CreateSaturating(50);
+
+        //Act
+        var result = Dummy.Number.LessThan(value).CreateMany();
+
+        //Assert
+        result.Should().OnlyContain(x => x.CompareTo(value) < 0);
+    }
+
+    [TestMethod]
     public void LessThanOrEqualTo_Always_ReturnNumbersThatAreLessThanOrEqualToValue()
     {
         //Arrange
@@ -57,6 +70,19 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
 
         //Act
         var result = Dummy.Number.LessThan(value).CreateMany(20);
+
+        //Assert
+        result.Should().OnlyContain(x => x.CompareTo(value) <= 0);
+    }
+
+    [TestMethod]
+    public void LessThanOrEqualToWithoutAmount_Always_ReturnNumbersThatAreLessThanOrEqualToValue()
+    {
+        //Arrange
+        var value = T.CreateSaturating(50);
+
+        //Act
+        var result = Dummy.Number.LessThan(value).CreateMany();
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(value) <= 0);
@@ -76,6 +102,19 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
     }
 
     [TestMethod]
+    public void GreaterThanWithoutAmount_Always_ReturnNumbersThatAreGreaterThanValue()
+    {
+        //Arrange
+        var value = T.CreateSaturating(50);
+
+        //Act
+        var result = Dummy.Number.GreaterThan(value).CreateMany();
+
+        //Assert
+        result.Should().OnlyContain(x => x.CompareTo(value) > 0);
+    }
+
+    [TestMethod]
     public void GreaterThanOrEqualTo_Always_ReturnNumbersThatAreGreaterThanOrEqualToValue()
     {
         //Arrange
@@ -83,6 +122,19 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
 
         //Act
         var result = Dummy.Number.GreaterThanOrEqualTo(value).CreateMany(20);
+
+        //Assert
+        result.Should().OnlyContain(x => x.CompareTo(value) >= 0);
+    }
+
+    [TestMethod]
+    public void GreaterThanOrEqualToWithoutAmount_Always_ReturnNumbersThatAreGreaterThanOrEqualToValue()
+    {
+        //Arrange
+        var value = T.CreateSaturating(50);
+
+        //Act
+        var result = Dummy.Number.GreaterThanOrEqualTo(value).CreateMany();
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(value) >= 0);
@@ -97,6 +149,20 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
 
         //Act
         var result = Dummy.Number.Between(min, max).CreateMany(20);
+
+        //Assert
+        result.Should().OnlyContain(x => x.CompareTo(min) >= 0 && x.CompareTo(max) <= 0);
+    }
+
+    [TestMethod]
+    public void BetweenWithoutAmount_Always_ReturnNumbersBetweenBoundaries()
+    {
+        //Arrange
+        var min = T.CreateSaturating(25);
+        var max = T.CreateSaturating(100);
+
+        //Act
+        var result = Dummy.Number.Between(min, max).CreateMany();
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(min) >= 0 && x.CompareTo(max) <= 0);

@@ -211,4 +211,98 @@ public class DummyTests : Tester
         result.Should().NotBeNull();
         result.Id.Should().BeGreaterThan(0);
     }
+
+    [TestMethod]
+    public void CreateManyNonGenericWithAmount_WhenTypeIsNull_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateMany(null!, 3);
+
+        //Assert
+        action.Should().Throw<ArgumentNullException>().WithParameterName("type");
+    }
+
+    [TestMethod]
+    public void CreateManyNonGenericWithAmount_WhenTypeIsNotNullButAmountIsNegative_Throw()
+    {
+        //Arrange
+        var type = Dummy.Create<Type>();
+        var amount = -Dummy.Create<int>();
+
+        //Act
+        var action = () => Dummy.CreateMany(type, amount);
+
+        //Assert
+        action.Should().Throw<ArgumentOutOfRangeException>().WithParameterName(nameof(amount));
+    }
+
+    [TestMethod]
+    public void CreateManyNonGenericWithAmount_WhenAmountIsZero_ReturnEmptyCollection()
+    {
+        //Arrange
+        
+        //Act
+        var result = Dummy.CreateMany(typeof(GarbageType), 0).ToList();
+
+        //Assert
+        result.Should().BeEmpty();
+    }
+
+    [TestMethod]
+    public void CreateManyNonGenericWithAmount_WhenTypeIsNotNullAndAmountIsPositive_GenerateDifferentObjectsWithRandomValues()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateMany(typeof(GarbageType), 4).ToList();
+
+        //Assert
+        result.Distinct().Count().Should().Be(4);
+    }
+
+    [TestMethod]
+    public void CustomizeWithEnumerable_WhenCustomizationsAreNull_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Customize((List<ICustomization>)null!);
+
+        //Assert
+        action.Should().Throw<ArgumentNullException>().WithParameterName("customizations");
+    }
+
+    [TestMethod]
+    public void CustomizeWithEnumerable_WhenCustomizationsAreEmpty_DoNotThrow()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.Customize(new List<ICustomization>());
+
+        //Assert
+        action.Should().NotThrow();
+    }
+
+    public sealed class GarbageTypeCustomization : CustomizationBase<GarbageType>
+    {
+        public override IDummyBuilder<GarbageType> Build(IDummy dummy) => dummy.Build<GarbageType>()
+            .With(x => x.A, "Seb")
+            .With(x => x.B, 69);
+    }
+
+    [TestMethod]
+    public void CustomizeWithEnumerable_WhenCustomizationIsValid_UseCustomizationWhenUsingCreate()
+    {
+        //Arrange
+        Dummy.Customize(new List<ICustomization> { new GarbageTypeCustomization() });
+
+        //Act
+        var result = Dummy.CreateMany<GarbageType>();
+
+        //Assert
+        result.Should().OnlyContain(x => x.A == "Seb" && x.B == 69);
+    }
 }

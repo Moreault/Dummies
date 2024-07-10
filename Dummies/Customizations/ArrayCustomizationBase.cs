@@ -8,6 +8,9 @@ public abstract class ArrayCustomizationBase : ICustomization
 
     public IDummyBuilder Build(IDummy dummy, Type type)
     {
+        if (dummy == null) throw new ArgumentNullException(nameof(dummy));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+
         return dummy.Build<object>().FromFactory(() =>
         {
             var elementType = type.GetElementType()!;

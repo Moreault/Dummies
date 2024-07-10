@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.Collections;
 
 [TestClass]
-public sealed class DictionaryCustomizationTests : Tester
+public sealed class ImmutableDictionaryCustomizationTests : CustomizationTester<ImmutableDictionaryCustomization>
 {
     [TestMethod]
     public void Always_CreateWithMutlipleElements()
@@ -9,7 +9,7 @@ public sealed class DictionaryCustomizationTests : Tester
         //Arrange
 
         //Act
-        var result = Dummy.Create<Dictionary<int, string>>();
+        var result = Dummy.Create<ImmutableDictionary<int, string>>();
 
         //Assert
         result.Should().HaveCount(3);
@@ -21,7 +21,19 @@ public sealed class DictionaryCustomizationTests : Tester
         //Arrange
 
         //Act
-        var result = Dummy.Create<IDictionary<string, long>>();
+        var result = Dummy.Create<IImmutableDictionary<string, long>>();
+
+        //Assert
+        result.Should().HaveCount(3);
+    }
+
+    [TestMethod]
+    public void WhenIsIReadOnlyDictionary_CreateWithMutlipleElements()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Create<IReadOnlyDictionary<string, float>>();
 
         //Assert
         result.Should().HaveCount(3);

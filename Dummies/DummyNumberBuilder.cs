@@ -79,6 +79,7 @@ internal sealed class DummyNumberBuilder<T> : IDummyNumberBuilder<T> where T : I
 
     internal DummyNumberBuilder(IDummy dummy, Func<T> factory)
     {
+        _dummy = dummy;
         _factory = factory;
     }
 

@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies.Customizations;
+﻿namespace ToolBX.Dummies;
 
 internal sealed class DepthGuardDummy : IDummy
 {
@@ -42,6 +42,8 @@ internal sealed class DepthGuardDummy : IDummy
     public IDummy Exclude<TEnum>(params TEnum[] values) where TEnum : Enum => _dummy.Exclude(values);
 
     public IDummy Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum => _dummy.Exclude(values);
+
+    public void Register<T>(T? instance) => _dummy.Register(instance);
 
     public DepthGuardDummy Deeper() => new(_dummy, CurrentDepth + 1);
 }

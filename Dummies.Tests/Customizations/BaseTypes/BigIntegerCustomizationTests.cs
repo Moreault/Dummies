@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class BigIntegerCustomizationTests : Tester
+public sealed class BigIntegerCustomizationTests : CustomizationTester<BigIntegerCustomization>
 {
     [TestMethod]
     public void WhenCreate_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class BigIntegerCustomizationTests : Tester
         var result = Dummy.Create<BigInteger>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]

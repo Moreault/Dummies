@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.Collections;
 
 [TestClass]
-public sealed class ArrayListCustomizationTests : Tester
+public sealed class ArrayListCustomizationTests : CustomizationTester<ArrayListCustomization>
 {
     [TestMethod]
     public void Always_CreateWithMutlipleElements()

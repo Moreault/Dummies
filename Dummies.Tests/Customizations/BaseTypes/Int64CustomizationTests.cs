@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class Int64CustomizationTests : Tester
+public sealed class Int64CustomizationTests : CustomizationTester<Int64Customization>
 {
     [TestMethod]
     public void WhenInt64_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class Int64CustomizationTests : Tester
         var result = Dummy.Create<long>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]

@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class StringCustomizationTests : Tester
+public sealed class StringCustomizationTests : CustomizationTester<StringCustomization>
 {
     [TestMethod]
     public void Always_CreateNonEmpty()

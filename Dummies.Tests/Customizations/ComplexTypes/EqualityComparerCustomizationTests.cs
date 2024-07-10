@@ -6,7 +6,7 @@ public sealed class EqualityComparerOfIntCustomizationTests : EqualityComparerCu
 [TestClass]
 public sealed class EqualityComparerOfStringCustomizationTests : EqualityComparerCustomizationTester<string>;
 
-public abstract class EqualityComparerCustomizationTester<T> : Tester
+public abstract class EqualityComparerCustomizationTester<T> : CustomizationTester<EqualityComparerCustomization>
 {
     [TestMethod]
     public void Equals_WhenComparingWithSameValues_ShouldBeTrue()

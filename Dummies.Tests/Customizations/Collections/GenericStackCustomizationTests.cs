@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.Collections;
 
 [TestClass]
-public sealed class GenericGenericStackCustomizationTests : Tester
+public sealed class GenericStackCustomizationTests : CustomizationTester<GenericStackCustomization>
 {
     [TestMethod]
     public void Always_CreateWithMutlipleElements()

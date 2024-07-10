@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.ComplexTypes;
 
 [TestClass]
-public class ActionCustomizationTests : Tester
+public class ActionCustomizationTests : CustomizationTester<ActionCustomization>
 {
     [TestMethod]
     public void WhenIsAction0_ExecutingItShouldNotThrow()

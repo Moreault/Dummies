@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.ComplexTypes;
 
 [TestClass]
-public class FuncTests : Tester
+public class FuncTests : CustomizationTester<FuncCustomization>
 {
     [TestMethod]
     public void WhenIsFunc1_BuildFuncThatReturnsDefault()

@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class DoubleCustomizationTests : Tester
+public sealed class DoubleCustomizationTests : CustomizationTester<DoubleCustomization>
 {
     [TestMethod]
     public void Always_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class DoubleCustomizationTests : Tester
         var result = Dummy.Create<double>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]

@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class BoolCustomizationTests : Tester
+public sealed class BoolCustomizationTests : CustomizationTester<BoolCustomization>
 {
     [TestMethod]
     public void WhenCreate_CreatePositiveIntGreaterThanOne()

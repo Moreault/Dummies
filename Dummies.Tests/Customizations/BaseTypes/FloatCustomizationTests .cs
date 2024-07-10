@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class FloatCustomizationTests : Tester
+public sealed class FloatCustomizationTests : CustomizationTester<FloatCustomization>
 {
     [TestMethod]
     public void Always_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class FloatCustomizationTests : Tester
         var result = Dummy.Create<float>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]

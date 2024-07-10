@@ -3,7 +3,7 @@
 namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class IpAddressCustomizationTests : Tester
+public sealed class IpAddressCustomizationTests : CustomizationTester<IpAddressCustomization>
 {
     [TestMethod]
     public void WhenCreate_CreatePositiveIntGreaterThanOne()

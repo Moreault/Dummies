@@ -118,4 +118,66 @@ public sealed class DummyPathBuilderTests : Tester
         foreach (var path in rootless)
             path.Split("/").Length.Should().BeInRange(0, 3);
     }
+
+    [TestMethod]
+    public void Create_WhenUsingACustomSeparator_UseOnlyThisSeparator()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithDepth.Exactly(3).WithSeparator('|').Create();
+
+        //Assert
+        result.Count(x => x == '|').Should().Be(4);
+        result.Should().NotContain(Path.DirectorySeparatorChar.ToString());
+        result.Should().NotContain(Path.AltDirectorySeparatorChar.ToString());
+    }
+
+    [TestMethod]
+    public void Create_WhenUsingFileNameExactLength_AlwaysReturnSameFileName()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithLength.Exactly(10).CreateMany(5);
+
+        //Assert
+        result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x == 10);
+    }
+
+    [TestMethod]
+    public void Create_WhenUsingFileNameLengthBetween_AllFileNamesAreBetweenMinAndMax()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithLength.Between(9, 15).CreateMany(5);
+
+        //Assert
+        result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x >= 9 && x <= 15);
+    }
+
+    [TestMethod]
+    public void Create_WhenUsingFileNameLessThan_AllFileNamesAreLessThanSpecifiedButNeverZero()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithLength.LessThan(9).CreateMany(10);
+
+        //Assert
+        result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x > 0 && x < 9);
+    }
+
+    [TestMethod]
+    public void Create_WhenUsingFileNameLessThanOrEqualTo_AllFileNamesAreLessThanSpecifiedButNeverZero()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithLength.LessThanOrEqualTo(9).CreateMany(10);
+
+        //Assert
+        result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x > 0 && x <= 9);
+    }
 }

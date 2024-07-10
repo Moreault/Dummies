@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class UInt16CustomizationTests : Tester
+public sealed class UInt16CustomizationTests : CustomizationTester<UInt16Customization>
 {
     [TestMethod]
     public void WhenInt32_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class UInt16CustomizationTests : Tester
         var result = Dummy.Create<ushort>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]

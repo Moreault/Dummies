@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class GuidCustomizationTests : Tester
+public sealed class GuidCustomizationTests : CustomizationTester<GuidCustomization>
 {
     [TestMethod]
     public void Always_CreatePositiveIntGreaterThanOne()

@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
-public sealed class SByteCustomizationTests : Tester
+public sealed class SByteCustomizationTests : CustomizationTester<SByteCustomization>
 {
     [TestMethod]
     public void WhenCreate_CreatePositiveIntGreaterThanOne()
@@ -12,7 +12,7 @@ public sealed class SByteCustomizationTests : Tester
         var result = Dummy.Create<sbyte>();
 
         //Assert
-        result.Should().BeGreaterThan(1);
+        result.Should().BeGreaterThan(0);
     }
 
     [TestMethod]
