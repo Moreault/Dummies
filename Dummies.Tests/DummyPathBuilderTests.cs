@@ -180,4 +180,72 @@ public sealed class DummyPathBuilderTests : Tester
         //Assert
         result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x > 0 && x <= 9);
     }
+
+    [TestMethod]
+    [DataRow(5)]
+    [DataRow(10)]
+    [DataRow(15)]
+    public void Create_WhenUsingSegmentLengthWithExactValue_AllSegmentsShouldHaveSameLength(int length)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithSegmentLength.Exactly(length).WithDepth.Exactly(5).Create().Split(Path.AltDirectorySeparatorChar).ToList();
+
+        //Assert
+        result.PopFirst();
+        result.PopLast();
+        result.Should().OnlyContain(x => x.Length == length);
+    }
+
+    [TestMethod]
+    [DataRow(5, 10)]
+    [DataRow(10, 15)]
+    [DataRow(15, 20)]
+    public void Create_WhenUsingSegmentLengthWithValueBetween_AllSegmentsShouldHaveLengthBetweenMinAndMax(int min, int max)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithSegmentLength.Between(min, max).WithDepth.Exactly(5).Create().Split(Path.AltDirectorySeparatorChar).ToList();
+
+        //Assert
+        result.PopFirst();
+        result.PopLast();
+        result.Should().OnlyContain(x => x.Length >= min && x.Length <= max);
+    }
+
+    [TestMethod]
+    [DataRow(5)]
+    [DataRow(10)]
+    [DataRow(15)]
+    public void Create_WhenUsingSegmentLengthWithLessThan_AllSegmentsShouldBeLessThan(int length)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithSegmentLength.LessThan(length).WithDepth.Exactly(5).Create().Split(Path.AltDirectorySeparatorChar).ToList();
+
+        //Assert
+        result.PopFirst();
+        result.PopLast();
+        result.Should().OnlyContain(x => x.Length >= 1 && x.Length < length);
+    }
+
+    [TestMethod]
+    [DataRow(5)]
+    [DataRow(10)]
+    [DataRow(15)]
+    public void Create_WhenUsingSegmentLengthWithLessThanOrEqualTo_AllSegmentsShouldBeLessThanOrEqualTo(int length)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithSegmentLength.LessThanOrEqualTo(length).WithDepth.Exactly(5).Create().Split(Path.AltDirectorySeparatorChar).ToList();
+
+        //Assert
+        result.PopFirst();
+        result.PopLast();
+        result.Should().OnlyContain(x => x.Length >= 1 && x.Length <= length);
+    }
 }

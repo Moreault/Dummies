@@ -190,9 +190,9 @@ internal sealed class DummyPathSegmentLengthBuilder : IDummyPathSegmentLengthBui
         return _parent;
     }
 
-    public IDummyPathBuilder LessThan(int value) => Between(0, value - 1);
+    public IDummyPathBuilder LessThan(int value) => Between(1, value - 1);
 
-    public IDummyPathBuilder LessThanOrEqualTo(int value) => Between(0, value);
+    public IDummyPathBuilder LessThanOrEqualTo(int value) => Between(1, value);
 }
 
 
