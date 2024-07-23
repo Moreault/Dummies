@@ -11,6 +11,9 @@ internal sealed record MemberValuePair
             if (_value is null)
                 return null;
 
+            if (_value.Equals(Omit.Instance))
+                return Omit.Instance;
+
             var realType = MemberInfo.GetMemberType();
             var valueType = _value.GetType();
             var value = _value;
@@ -31,16 +34,15 @@ internal sealed record MemberValuePair
     }
     private readonly object? _value;
 
-    public MemberValuePair(MemberInfo MemberInfo, object? Value)
+    internal readonly record struct Omit
     {
-        this.MemberInfo = MemberInfo;
-        this.Value = Value;
+        internal static readonly Omit Instance = new();
     }
 
-    public void Deconstruct(out MemberInfo MemberInfo, out object? Value)
+    public MemberValuePair(MemberInfo memberInfo, object? value)
     {
-        MemberInfo = this.MemberInfo;
-        Value = this.Value;
+        MemberInfo = memberInfo;
+        Value = value;
     }
 }
 

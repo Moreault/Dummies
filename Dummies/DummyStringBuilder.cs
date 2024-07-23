@@ -34,7 +34,11 @@ internal sealed class DummyStringBuilder : IDummyStringBuilder
 
     public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
 
-    public IEnumerable<string> CreateMany(int amount) => Enumerable.Repeat(Create(), amount);
+    public IEnumerable<string> CreateMany(int amount)
+    {
+        for (var i = 0; i < amount; i++)
+            yield return Create();
+    }
 }
 
 internal sealed class DummyStringLengthBuilder : IDummyStringLengthBuilder

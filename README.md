@@ -178,13 +178,13 @@ var person = dummy.Build<Person>()
 //person.Age == 42
 ```
 
-### `With` and `Without` methods
+### `With`, `Omit` and `Without` methods
 These methods can be used to tell the builder what to do with each property or field. They are chainable and can be used multiple times. They can also be used to specify a value for a property or field that would otherwise be generated automatically.
 
 ```cs
 public class Person
 {
-	public string Name { get; set; }
+	public string Name { get; set; } = "Default";
 	public int Age { get; set; }
 }
 
@@ -203,7 +203,19 @@ var person = dummy.Build<Person>()
 	.Create();
 
 //person.Name == null
+
+var person = dummy.Build<Person>()
+	.Omit(x => x.Name)
+	.With(x => x.Age, 42)
+	.Create();
+
+//person.Name == "Default"
 ```
+
+### `Omit` vs `Without`
+They can be the same thing in many cases but essentially, `Omit` means that the property or field will not be set _at all_. In other words, if your property or field has a default value that you set manually at instantiation then it will keep this default value. It tells Dummy to just not do anything with it.
+
+`Without`, on the other hand, sets that property or field to `default(T)` regardless of any value you set manually at instation. It is the equivalent of using `.With(x => x.PropertyOrField, null)`.
 
 ### FromFactory
 `FromFactory` is generally used to specify a custom factory method to create the object such as when the object has no public constructor or when you want to use a specific constructor. By default, `FromFactory` will not generate values for any properties or fields since it assumes that you are providing all the generation logic needed. You can still use `With` and `Without` to specify what to do with each property or field and they will be applied "on top" of the `FromFactory` method.

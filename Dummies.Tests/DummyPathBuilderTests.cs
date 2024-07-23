@@ -175,9 +175,10 @@ public sealed class DummyPathBuilderTests : Tester
         //Arrange
 
         //Act
-        var result = Dummy.Path.WithFileName.WithLength.LessThanOrEqualTo(9).CreateMany(10);
+        var result = Dummy.Path.WithFileName.WithLength.LessThanOrEqualTo(9).CreateMany(10).ToList();
 
         //Assert
+        result.Distinct().Should().HaveCount(10);
         result.Select(x => Path.GetFileNameWithoutExtension(x).Length).Should().OnlyContain(x => x > 0 && x <= 9);
     }
 

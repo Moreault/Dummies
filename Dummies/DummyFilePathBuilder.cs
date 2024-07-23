@@ -81,7 +81,11 @@ internal sealed class DummyPathBuilder : IDummyPathBuilder
 
     public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
 
-    public IEnumerable<string> CreateMany(int amount) => Enumerable.Repeat(Create(), amount);
+    public IEnumerable<string> CreateMany(int amount)
+    {
+        for (var i = 0; i < amount; i++)
+            yield return Create();
+    }
 }
 
 public interface IDummyPathRootBuilder
@@ -244,9 +248,9 @@ internal sealed class DummyPathFileNameLengthBuilder : IDummyPathFileNameLengthB
         return _parent;
     }
 
-    public IDummyPathBuilder LessThan(int value) => Between(0, value - 1);
+    public IDummyPathBuilder LessThan(int value) => Between(1, value - 1);
 
-    public IDummyPathBuilder LessThanOrEqualTo(int value) => Between(0, value);
+    public IDummyPathBuilder LessThanOrEqualTo(int value) => Between(1, value);
 }
 
 public interface IDummyPathFileNameExtensionBuilder

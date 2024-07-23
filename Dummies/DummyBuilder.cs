@@ -7,12 +7,50 @@ public interface IDummyBuilder
 
 public interface IDummyBuilder<T> : IDummyBuilder
 {
+    /// <summary>
+    /// Generates a single <see cref="T"/>.
+    /// </summary>
     T Create();
+
+    /// <summary>
+    /// Generates multiple <see cref="T"/>. The amount is taken from <see cref="Dummy"/>>'s <see cref="Dummy.Options"/> property.
+    /// </summary>
     IEnumerable<T> CreateMany();
+
+    /// <summary>
+    /// Generates a specific amount of <see cref="T"/>.
+    /// </summary>
     IEnumerable<T> CreateMany(int amount);
+
+    /// <summary>
+    /// Generates a field or property using a value.
+    /// </summary>
     IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember value);
+
+    /// <summary>
+    /// Generates a field or property using an expression which will be reevaluated every time the object is generated.
+    /// </summary>
     IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<TMember> value);
+
+    /// <summary>
+    /// Generates a field or property using a value from the parent <see cref="Dummy"/>.
+    /// </summary>
+    IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<IDummy, TMember> value);
+
+    /// <summary>
+    /// Generates a field or property using an expression using the parent <see cref="Dummy"/> which will be reevaluated every time the object is generated.
+    /// </summary>
+    IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<IDummy, Func<TMember>> value);
+
+    /// <summary>
+    /// Sets field or property to default value.
+    /// </summary>
     IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member);
+
+    /// <summary>
+    /// Omit from automatic generation.
+    /// </summary>
+    IDummyBuilder<T> Omit<TMember>(Expression<Func<T, TMember>> member);
 
     /// <summary>
     /// Ignores any customization that would otherwise be automatically applied.
@@ -20,10 +58,16 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> WithoutCustomizations();
 
     /// <summary>
-    /// All properties with a public setter (or init) and public fields will not be set automatically if left unspecified.
+    /// All properties with a public setter (or init) will be set to default.
     /// This is equivalent to calling <see cref="Without{TMember}"/> on every single property or field.
     /// </summary>
     IDummyBuilder<T> WithoutAutoProperties();
+
+    /// <summary>
+    /// All properties with a public setter (or init) and public fields will not be set automatically if left unspecified.
+    /// This is equivalent to calling <see cref="Omit{TMember}"/> on every single property or field.
+    /// </summary>
+    IDummyBuilder<T> OmitAutoProperties();
 
     /// <summary>
     /// Specifies how to create the object. Use this when <see cref="Dummy"/> can't create an object on its own.
@@ -66,6 +110,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     private Func<T>? _factory;
 
     private bool _withoutAutoProperties;
+    private bool _omitAutoProperties;
 
     internal DummyBuilder(Dummy dummy, int currentDepth = 0)
     {
@@ -75,7 +120,6 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     internal DummyBuilder(DepthGuardDummy dummy)
     {
         _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
-
     }
 
     public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, TMember? value)
@@ -97,12 +141,35 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
+    public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<IDummy, TMember> value)
+    {
+        if (member is null) throw new ArgumentNullException(nameof(member));
+        if (value is null) throw new ArgumentNullException(nameof(value));
+        return With(member, value.Invoke(_dummy));
+    }
+
+    public IDummyBuilder<T> With<TMember>(Expression<Func<T, TMember>> member, Func<IDummy, Func<TMember>> value)
+    {
+        if (member is null) throw new ArgumentNullException(nameof(member));
+        if (value is null) throw new ArgumentNullException(nameof(value));
+        return With(member, value.Invoke(_dummy));
+    }
+
     public IDummyBuilder<T> Without<TMember>(Expression<Func<T, TMember>> member)
     {
         if (member is null) throw new ArgumentNullException(nameof(member));
         var memberExpression = GetMemberExpression(member.Body);
         ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
         _memberValues.Add(new MemberValuePair(memberExpression.Member, null));
+        return this;
+    }
+
+    public IDummyBuilder<T> Omit<TMember>(Expression<Func<T, TMember>> member)
+    {
+        if (member is null) throw new ArgumentNullException(nameof(member));
+        var memberExpression = GetMemberExpression(member.Body);
+        ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, MemberValuePair.Omit.Instance));
         return this;
     }
 
@@ -151,11 +218,17 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
+    public IDummyBuilder<T> OmitAutoProperties()
+    {
+        _omitAutoProperties = true;
+        return this;
+    }
+
     public IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null)
     {
         options ??= FactoryOptions.Default;
         if (!options.UseAutoProperties)
-            WithoutAutoProperties();
+            OmitAutoProperties();
 
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
@@ -183,6 +256,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         casted._memberValues.AddRange(_memberValues);
         casted._usesCustomizations = _usesCustomizations;
         casted._withoutAutoProperties = _withoutAutoProperties;
+        casted._omitAutoProperties = _omitAutoProperties;
         casted._factory = _factory is not null ? () => (T2)(object)_factory() : null;
         return casted;
     }
@@ -212,6 +286,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         if (customizationBuilder is DummyBuilder<T> concreteBuilder)
         {
             _withoutAutoProperties = concreteBuilder._withoutAutoProperties;
+            _omitAutoProperties = concreteBuilder._omitAutoProperties;
             var originals = _memberValues.ToList();
             var customizations = concreteBuilder._memberValues.ToList();
             _memberValues.AddRange(customizations);
@@ -263,30 +338,41 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
                 if (!typeof(T).IsEnum)
                 {
-                    foreach (var property in typeof(T).GetAllProperties(x =>
-                                 x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
-                                 !x.IsIndexer()))
+                    if (!_omitAutoProperties)
                     {
-                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
-                        if (memberValue is null)
+                        foreach (var property in typeof(T).GetAllProperties(x => x.IsInstance() &&
+                                     x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
+                                     !x.IsIndexer()))
                         {
-                            if (!_withoutAutoProperties)
-                                property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                            if (_withoutAutoProperties)
+                            {
+                                property.SetValue(instance, default);
+                            }
+                            else
+                            {
+                                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
+                                if (memberValue is null)
+                                    property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                                else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
+                                    property.SetValue(instance, memberValue.Value);
+                            }
                         }
-                        else if (memberValue.Value is not null)
-                            property.SetValue(instance, memberValue.Value);
-                    }
 
-                    foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
-                    {
-                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
-                        if (memberValue is null)
+                        foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
                         {
-                            if (!_withoutAutoProperties)
-                                field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                            if (_withoutAutoProperties)
+                            {
+                                field.SetValue(instance, default);
+                            }
+                            else
+                            {
+                                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
+                                if (memberValue is null)
+                                    field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                                else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
+                                    field.SetValue(instance, memberValue.Value);
+                            }
                         }
-                        else if (memberValue.Value is not null)
-                            field.SetValue(instance, memberValue.Value);
                     }
                 }
             }
