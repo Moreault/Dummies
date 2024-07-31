@@ -1,7 +1,7 @@
 ﻿namespace Dummies.Tests;
 
 [TestClass]
-public sealed class DummyPathBuilderTests : Tester
+public sealed class DummyFilePathBuilderTests : Tester
 {
     [TestMethod]
     public void Create_WhenUsingWindowsRoot_PathShouldHaveWindowsRoot()
@@ -248,5 +248,85 @@ public sealed class DummyPathBuilderTests : Tester
         result.PopFirst();
         result.PopLast();
         result.Should().OnlyContain(x => x.Length >= 1 && x.Length <= length);
+    }
+
+    [TestMethod]
+    public void Create_WhenUsedWithFileNameExtensionAlways_ReturnDifferentPathsAndFileNamesWithSameExtension()
+    {
+        //Arrange
+        var extension = Dummy.String.WithLength.Exactly(3).Create();
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithExtension.Always(extension).CreateMany(10).ToList();
+
+        //Assert
+        result.Distinct().Should().HaveCount(10);
+        foreach (var path in result)
+            Path.GetExtension(path).Trim('.').Should().Be(extension);
+    }
+
+    [TestMethod]
+    [DataRow(3, 5)]
+    [DataRow(5, 8)]
+    public void Create_WhenUsedWithFileNameExtensionLengthBetween_ReturnDifferentPathsWithExtensionsBetweenLengths(int min, int max)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithExtension.WithLengthBetween(min, max).CreateMany(10).ToList();
+
+        //Assert
+        result.Distinct().Should().HaveCount(10);
+        var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
+        extensions.Distinct().Count().Should().BeGreaterThan(1);
+        extensions.Should().OnlyContain(x => x.Length >= min && x.Length <= max);
+    }
+
+    [TestMethod]
+    [DataRow(3)]
+    [DataRow(5)]
+    [DataRow(9)]
+    public void Create_WhenUSedWithFileNameExtensionWithLength_ReturnDifferentExtensionsOfSameLength(int length)
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithExtension.WithLength(length).CreateMany(10).ToList();
+
+        //Assert
+        result.Distinct().Should().HaveCount(10);
+        var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
+        extensions.Distinct().Count().Should().BeGreaterThan(1);
+        extensions.Should().OnlyContain(x => x.Length == length);
+    }
+
+    [TestMethod]
+    public void Create_WhenUsedWithFileNameExtensionOneOf_ReturnRandomExtensionsFromProvidedList()
+    {
+        //Arrange
+        var possibleExtensions = new List<string> { "mp3", "ogg", "img" };
+
+        //Act
+        var result = Dummy.Path.WithFileName.WithExtension.OneOf(possibleExtensions).CreateMany(10).ToList();
+
+        //Assert
+        result.Distinct().Should().HaveCount(10);
+        var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
+        extensions.Distinct().Count().Should().BeGreaterThan(1);
+        extensions.Should().OnlyContain(x => x == "mp3" || x == "ogg" || x == "img");
+    }
+
+    [TestMethod]
+    public void Create_WhenUsedWithFileNameExtensionOneOfWithParams_ReturnRandomExtensionsFromProvidedList()
+    {
+        //Arrange
+        //Act
+        var result = Dummy.Path.WithFileName.WithExtension.OneOf("mp3", "ogg", "img").CreateMany(10).ToList();
+
+        //Assert
+        result.Distinct().Should().HaveCount(10);
+        var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
+        extensions.Distinct().Count().Should().BeGreaterThan(1);
+        extensions.Should().OnlyContain(x => x == "mp3" || x == "ogg" || x == "img");
     }
 }

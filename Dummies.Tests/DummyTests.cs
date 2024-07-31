@@ -305,4 +305,33 @@ public class DummyTests : Tester
         //Assert
         result.Should().OnlyContain(x => x.A == "Seb" && x.B == 69);
     }
+
+    [TestMethod]
+    public void CreateMany_WhenDefaultCollectionSizeIsSet_ReturnCollectionWithThatNumberOfElements()
+    {
+        //Arrange
+        Dummy.Options.DefaultCollectionSize = 5;
+
+        //Act
+        var result = Dummy.CreateMany<GarbageType>();
+
+        //Assert
+        result.Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void CreateMany_WhenGlobalDefaultCollectionSizeIsSet_ReturnCollectionWithThatNumberOfElements()
+    {
+        //Arrange
+        var defaultSize = DummyOptions.Global.DefaultCollectionSize;
+        DummyOptions.Global.DefaultCollectionSize = 7;
+
+        //Act
+        var result = Dummy.CreateMany<GarbageType>();
+
+        //Assert
+        result.Should().HaveCount(7);
+        //Setting it to default value because otherwise it affects all tests
+        DummyOptions.Global.DefaultCollectionSize = defaultSize;
+    }
 }

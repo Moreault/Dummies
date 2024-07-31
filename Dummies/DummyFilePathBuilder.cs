@@ -257,6 +257,7 @@ public interface IDummyPathFileNameExtensionBuilder
 {
     IDummyPathBuilder Always(string value);
     IDummyPathBuilder OneOf(params string[] value);
+    IDummyPathBuilder OneOf(IEnumerable<string> value);
     IDummyPathBuilder WithLength(int length);
     IDummyPathBuilder WithLengthBetween(int min, int max);
 }
@@ -276,7 +277,9 @@ internal sealed class DummyPathFileNameExtensionBuilder : IDummyPathFileNameExte
         return _parent;
     }
 
-    public IDummyPathBuilder OneOf(params string[] value)
+    public IDummyPathBuilder OneOf(params string[] value) => OneOf(value as IEnumerable<string>);
+
+    public IDummyPathBuilder OneOf(IEnumerable<string> value)
     {
         _parent.FileExtension = value.GetRandom;
         return _parent;

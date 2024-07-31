@@ -69,7 +69,7 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
         var value = T.CreateSaturating(50);
 
         //Act
-        var result = Dummy.Number.LessThan(value).CreateMany(20);
+        var result = Dummy.Number.LessThanOrEqualTo(value).CreateMany(20);
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(value) <= 0);
@@ -82,7 +82,7 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
         var value = T.CreateSaturating(50);
 
         //Act
-        var result = Dummy.Number.LessThan(value).CreateMany();
+        var result = Dummy.Number.LessThanOrEqualTo(value).CreateMany();
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(value) <= 0);
@@ -166,5 +166,47 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
 
         //Assert
         result.Should().OnlyContain(x => x.CompareTo(min) >= 0 && x.CompareTo(max) <= 0);
+    }
+
+    [TestMethod]
+    public void Create_Always_GenerateNumberBetweenMinAndMax()
+    {
+        //Arrange
+        var min = T.MinValue;
+        var max = T.MaxValue;
+
+        //Act
+        var result = Dummy.Number.Create<T>();
+
+        //Assert
+        result.Should().BeInRange(min, max);
+    }
+
+    [TestMethod]
+    public void CreateManyWithoutAmount_Always_GenerateNumberBetweenMinAndMax()
+    {
+        //Arrange
+        var min = T.MinValue;
+        var max = T.MaxValue;
+
+        //Act
+        var result = Dummy.Number.CreateMany<T>();
+
+        //Assert
+        result.Should().OnlyContain(x => x.IsGreaterThanOrEqualTo(min) && x.IsLesserThanOrEqualTo(max));
+    }
+
+    [TestMethod]
+    public void CreateManyWithAmount_Always_GenerateNumberBetweenMinAndMax()
+    {
+        //Arrange
+        var min = T.MinValue;
+        var max = T.MaxValue;
+
+        //Act
+        var result = Dummy.Number.CreateMany<T>(20);
+
+        //Assert
+        result.Should().OnlyContain(x => x.IsGreaterThanOrEqualTo(min) && x.IsLesserThanOrEqualTo(max));
     }
 }

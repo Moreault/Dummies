@@ -227,8 +227,8 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     public IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null)
     {
         options ??= FactoryOptions.Default;
-        if (!options.UseAutoProperties)
-            OmitAutoProperties();
+
+        _omitAutoProperties = options.OmitAutoProperties;
 
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
@@ -257,7 +257,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         casted._usesCustomizations = _usesCustomizations;
         casted._withoutAutoProperties = _withoutAutoProperties;
         casted._omitAutoProperties = _omitAutoProperties;
-        casted._factory = _factory is not null ? () => (T2)(object)_factory() : null;
+        casted._factory = _factory is not null ? () => (T2)(object)_factory()! : null;
         return casted;
     }
 
@@ -278,22 +278,25 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     {
         if (amount <= 0) throw new ArgumentException(string.Format(ExceptionMessages.CannotCreateNegativeOrZeroObjects, amount));
 
-        var customization = FindCustomization<T>();
-        IDummyBuilder<T> customizationBuilder = null!;
-        if (customization is not null)
-            customizationBuilder = customization.Build(_dummy, typeof(T)).As<T>();
-
-        if (customizationBuilder is DummyBuilder<T> concreteBuilder)
+        if (_usesCustomizations)
         {
-            _withoutAutoProperties = concreteBuilder._withoutAutoProperties;
-            _omitAutoProperties = concreteBuilder._omitAutoProperties;
-            var originals = _memberValues.ToList();
-            var customizations = concreteBuilder._memberValues.ToList();
-            _memberValues.AddRange(customizations);
-            _memberValues.AddRange(originals);
+            var customization = FindCustomization<T>();
+            IDummyBuilder<T> customizationBuilder = null!;
+            if (customization is not null)
+                customizationBuilder = customization.Build(_dummy, typeof(T)).As<T>();
 
-            if (concreteBuilder._factory is not null)
-                _factory = concreteBuilder._factory;
+            if (customizationBuilder is DummyBuilder<T> concreteBuilder)
+            {
+                _withoutAutoProperties = concreteBuilder._withoutAutoProperties;
+                _omitAutoProperties = concreteBuilder._omitAutoProperties;
+                var originals = _memberValues.ToList();
+                var customizations = concreteBuilder._memberValues.ToList();
+                _memberValues.AddRange(customizations);
+                _memberValues.AddRange(originals);
+
+                if (concreteBuilder._factory is not null)
+                    _factory = concreteBuilder._factory;
+            }
         }
 
         var deeperDummy = _dummy.Deeper();
@@ -338,41 +341,34 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
                 if (!typeof(T).IsEnum)
                 {
-                    if (!_omitAutoProperties)
+                    foreach (var property in typeof(T).GetAllProperties(x => x.IsInstance() &&
+                                 x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
+                                 !x.IsIndexer()))
                     {
-                        foreach (var property in typeof(T).GetAllProperties(x => x.IsInstance() &&
-                                     x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
-                                     !x.IsIndexer()))
+                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
+                        if (memberValue is null)
                         {
                             if (_withoutAutoProperties)
-                            {
                                 property.SetValue(instance, default);
-                            }
-                            else
-                            {
-                                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
-                                if (memberValue is null)
-                                    property.SetValue(instance, deeperDummy.Create(property.PropertyType));
-                                else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
-                                    property.SetValue(instance, memberValue.Value);
-                            }
+                            else if (!_omitAutoProperties)
+                                property.SetValue(instance, deeperDummy.Create(property.PropertyType));
                         }
+                        else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
+                            property.SetValue(instance, memberValue.Value);
+                    }
 
-                        foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
+                    foreach (var field in typeof(T).GetAllFields(x => x.IsPublic && x.IsInstance()))
+                    {
+                        var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
+                        if (memberValue is null)
                         {
                             if (_withoutAutoProperties)
-                            {
                                 field.SetValue(instance, default);
-                            }
-                            else
-                            {
-                                var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == field.Name);
-                                if (memberValue is null)
-                                    field.SetValue(instance, deeperDummy.Create(field.FieldType));
-                                else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
-                                    field.SetValue(instance, memberValue.Value);
-                            }
+                            else if (!_omitAutoProperties)
+                                field.SetValue(instance, deeperDummy.Create(field.FieldType));
                         }
+                        else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
+                            field.SetValue(instance, memberValue.Value);
                     }
                 }
             }

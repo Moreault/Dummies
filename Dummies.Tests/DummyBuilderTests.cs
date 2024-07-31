@@ -1,6 +1,4 @@
-﻿using FluentAssertions.Equivalency;
-
-namespace Dummies.Tests;
+﻿namespace Dummies.Tests;
 
 [TestClass]
 public sealed class DummyBuilderTests : Tester
@@ -447,8 +445,8 @@ public sealed class DummyBuilderTests : Tester
 
     public sealed record FieldedGarbage
     {
-        public required string Name;
-        public int Id;
+        public string Name = "Seb";
+        public int Id = 200;
     }
 
     [TestMethod]
@@ -467,5 +465,215 @@ public sealed class DummyBuilderTests : Tester
         });
     }
 
-    //TODO Test Omit, Without, OmitAll and WithoutAll with fields
+    [TestMethod]
+    public void Omit_WhenIsField_IgnoreField()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<FieldedGarbage>().Omit(x => x.Name).With(x => x.Id, 5).Create();
+
+        //Assert
+        result.Should().Be(new FieldedGarbage
+        {
+            Name = "Seb",
+            Id = 5
+        });
+    }
+
+    [TestMethod]
+    public void Without_WhenIsField_SetFieldToDefaultValue()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<FieldedGarbage>().Without(x => x.Name).With(x => x.Id, 104).Create();
+
+        //Assert
+        result.Should().Be(new FieldedGarbage
+        {
+            Name = null!,
+            Id = 104
+        });
+    }
+
+    [TestMethod]
+    public void OmitAutoProperties_WhenIsFieldedObject_OmitAll()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<FieldedGarbage>().OmitAutoProperties().Create();
+
+        //Assert
+        result.Should().Be(new FieldedGarbage
+        {
+            Name = "Seb",
+            Id = 200
+        });
+    }
+
+    [TestMethod]
+    public void WithoutAutoProperties_WhenIsFieldedObject_AllPropertiesShouldBeDefault()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<FieldedGarbage>().WithoutAutoProperties().Create();
+
+        //Assert
+        result.Should().Be(new FieldedGarbage
+        {
+            Name = null!,
+            Id = 0
+        });
+    }
+
+    [TestMethod]
+    public void With_WhenCombinedWithOmitAutoProperties_DoNotOmitSpecifiedProperties()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<Garbage>().OmitAutoProperties().With(x => x.Experience, 200).With(x => x.Name, "Seb").Create();
+
+        //Assert
+        result.Should().Be(new Garbage
+        {
+            Name = "Seb",
+            Experience = 200
+        });
+    }
+
+    [TestMethod]
+    public void With_WhenCombinedWithWithoutAutoProperties_DoNotSetSSpecifiedPropertiesToDefault()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<Garbage>().WithoutAutoProperties().With(x => x.Gold, 200).Create();
+
+        //Assert
+        result.Should().Be(new Garbage
+        {
+            Name = null!,
+            Gold = 200,
+            Id = 0,
+            Experience = 0,
+            Health = 0,
+            Level = 0,
+            Mana = 0,
+            Symbol = 0
+        });
+    }
+
+    public sealed record CustomizedGarbage
+    {
+        public int Id { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public int Experience { get; init; }
+        public int Level { get; init; }
+    }
+
+    [AutoCustomization]
+    public sealed class CustomizedGarbageCustomization : CustomizationBase<CustomizedGarbage>
+    {
+        public override IDummyBuilder<CustomizedGarbage> Build(IDummy dummy) => dummy.Build<CustomizedGarbage>().FromFactory(() => new CustomizedGarbage
+        {
+            Name = "User",
+            Level = -dummy.Number.Between(1, 20).Create(),
+            Experience = -dummy.Number.Between(0, 90).Create()
+        });
+    }
+
+    [TestMethod]
+    public void WithoutCustomizations_WhenNoCustomizationWasLoaded_BuildAsUsual()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<Garbage>().WithoutCustomizations().Create();
+
+        //Assert
+        result.Name.Should().NotBeNullOrWhiteSpace();
+        result.Level.Should().BeGreaterOrEqualTo(1);
+        result.Experience.Should().BeGreaterOrEqualTo(1);
+        result.Gold.Should().BeGreaterOrEqualTo(1);
+        result.Health.Should().BeGreaterOrEqualTo(1);
+        result.Id.Should().BeGreaterOrEqualTo(1);
+        result.Symbol.Should().BeGreaterOrEqualTo(1);
+    }
+
+    [TestMethod]
+    public void WithoutCustomizations_WhenCustomizationsForTypeIsLoaded_IgnoreIt()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<CustomizedGarbage>().WithoutCustomizations().Create();
+
+        //Assert
+        result.Name.Should().NotBe("User");
+        result.Level.Should().BeGreaterOrEqualTo(1);
+        result.Experience.Should().BeGreaterOrEqualTo(1);
+        result.Id.Should().BeGreaterOrEqualTo(1);
+    }
+
+    [TestMethod]
+    public void WithoutCustomizations_WhenAddingSpecifics_IgnoreCustomization()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<CustomizedGarbage>().WithoutCustomizations().With(x => x.Name, "Seb").With(x => x.Id, 99).Create();
+
+        //Assert
+        result.Name.Should().Be("Seb");
+        result.Level.Should().BeGreaterOrEqualTo(1);
+        result.Experience.Should().BeGreaterOrEqualTo(1);
+        result.Id.Should().Be(99);
+    }
+
+    [TestMethod]
+    public void With_WhenBuildingCustomizedObject_OverrideSpecifiedProperties()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<CustomizedGarbage>().With(x => x.Name, "Seb").With(x => x.Id, 99).Create();
+
+        //Assert
+        result.Name.Should().Be("Seb");
+        result.Level.Should().BeInRange(-20, -1);
+        result.Experience.Should().BeInRange(-90, 0);
+        result.Id.Should().Be(99);
+    }
+
+    public sealed record GarbageWithEnum
+    {
+        public string Name { get; init; } = null!;
+        public GarbageEnum Value { get; init; }
+    }
+
+    public enum GarbageEnum
+    {
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six
+    }
+
+    [TestMethod]
+    public void ExcludeEnum_Always_ExcludeThoseValuesFromCreation()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Build<GarbageWithEnum>().Exclude(GarbageEnum.Two, GarbageEnum.Five).CreateMany(50).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x.Value == GarbageEnum.One || x.Value == GarbageEnum.Three || x.Value == GarbageEnum.Four || x.Value == GarbageEnum.Six);
+    }
 }
