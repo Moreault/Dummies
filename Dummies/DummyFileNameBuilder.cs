@@ -2,14 +2,10 @@
 
 namespace ToolBX.Dummies;
 
-public interface IDummyFileNameBuilder
+public interface IDummyFileNameBuilder : ISpecializedBuilder<string>
 {
     IDummyFileNameLengthBuilder WithLength { get; }
     IDummyFileNameExtensionBuilder WithExtension { get; }
-
-    string Create();
-    IEnumerable<string> CreateMany();
-    IEnumerable<string> CreateMany(int amount);
 }
 
 public interface IDummyFileNameLengthBuilder
@@ -28,10 +24,8 @@ public interface IDummyFileNameExtensionBuilder
     IDummyFileNameBuilder WithLengthBetween(int min, int max);
 }
 
-internal sealed class DummyFileNameBuilder : IDummyFileNameBuilder
+internal sealed class DummyFileNameBuilder : SpecializedBuilder<string>, IDummyFileNameBuilder
 {
-    private readonly IDummy _dummy;
-
     internal Func<int> Length = () => 21;
 
     internal Func<string> Extension = DummyFileNameExtensionBuilder.Default;
@@ -40,20 +34,11 @@ internal sealed class DummyFileNameBuilder : IDummyFileNameBuilder
 
     public IDummyFileNameExtensionBuilder WithExtension => new DummyFileNameExtensionBuilder(this);
 
-    public DummyFileNameBuilder(IDummy dummy)
+    public DummyFileNameBuilder(IDummy dummy) : base(dummy)
     {
-        _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
     }
 
-    public string Create() => $"{RandomStringGenerator.Generate(Length())}.{Extension().ToLowerInvariant()}";
-
-    public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<string> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
-    }
+    public override string Create() => $"{RandomStringGenerator.Generate(Length())}.{Extension().ToLowerInvariant()}";
 }
 
 internal sealed class DummyFileNameLengthBuilder : IDummyFileNameLengthBuilder
@@ -77,9 +62,9 @@ internal sealed class DummyFileNameLengthBuilder : IDummyFileNameLengthBuilder
         return _builder;
     }
 
-    public IDummyFileNameBuilder LessThan(int value) => Between(0, value - 1);
+    public IDummyFileNameBuilder LessThan(int value) => Between(1, value - 1);
 
-    public IDummyFileNameBuilder LessThanOrEqualTo(int value) => Between(0, value);
+    public IDummyFileNameBuilder LessThanOrEqualTo(int value) => Between(1, value);
 }
 
 internal sealed class DummyFileNameExtensionBuilder : IDummyFileNameExtensionBuilder

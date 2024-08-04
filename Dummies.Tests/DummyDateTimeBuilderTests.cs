@@ -1,4 +1,6 @@
-﻿namespace Dummies.Tests;
+﻿using TimeProvider = ToolBX.TimeProvider.TimeProvider;
+
+namespace Dummies.Tests;
 
 [TestClass]
 public sealed class DummyDateTimeBuilderTests : Tester
@@ -259,5 +261,229 @@ public sealed class DummyDateTimeBuilderTests : Tester
 
         //Assert
         result.Should().OnlyContain(x => x < value);
+    }
+
+    [TestMethod]
+    public void Create_WhenNoCustomization_ReturnRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.Create();
+
+        //Assert
+        result.Should().BeOnOrAfter(DateTime.MinValue);
+        result.Should().BeOnOrBefore(DateTime.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateMany_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateMany();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateTime.MinValue && x <= DateTime.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateManyWithAmount_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateMany(10);
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateTime.MinValue && x <= DateTime.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateOffset_WhenNoCustomization_ReturnRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateOffset();
+
+        //Assert
+        result.Should().BeOnOrAfter(DateTimeOffset.MinValue);
+        result.Should().BeOnOrBefore(DateTimeOffset.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateManyOffset_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateManyOffset();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateTimeOffset.MinValue && x <= DateTimeOffset.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateManyOffsetWithAmount_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateManyOffset(10);
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateTimeOffset.MinValue && x <= DateTimeOffset.MaxValue);
+    }
+
+
+    [TestMethod]
+    public void CreateDateOnly_WhenNoCustomization_ReturnRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateDateOnly();
+
+        //Assert
+        result.Should().BeOnOrAfter(DateOnly.MinValue);
+        result.Should().BeOnOrBefore(DateOnly.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateManyDateOnly_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateManyDateOnly();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateOnly.MinValue && x <= DateOnly.MaxValue);
+    }
+
+    [TestMethod]
+    public void CreateManyDateOnlyWithAmount_WhenNoCustomization_ReturnManyRandomDateTime()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Date.CreateManyDateOnly(10);
+
+        //Assert
+        result.Should().OnlyContain(x => x >= DateOnly.MinValue && x <= DateOnly.MaxValue);
+    }
+
+    [TestMethod]
+    public void BeforeNow_Always_CreateDatesBetweenFiveYearsAgoAndOneMinuteAgo()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTime>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.BeforeNow().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddYears(-5) && x <= now.AddMinutes(-1));
+    }
+
+    [TestMethod]
+    public void BeforeNowOffset_Always_CreateDatesBetweenFiveYearsAgoAndOneMinuteAgo()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTimeOffset>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.BeforeNowOffset().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddYears(-5) && x <= now.AddMinutes(-1));
+    }
+
+    [TestMethod]
+    public void BeforeToday_Always_CreateDatesBetweenFiveYearsAgoAndOneMinuteAgo()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTime>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.BeforeToday().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddYears(-5) && x <= now.AddDays(-1));
+    }
+
+    [TestMethod]
+    public void BeforeTodayOffset_Always_CreateDatesBetweenFiveYearsAgoAndOneMinuteAgo()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTimeOffset>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.BeforeTodayOffset().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddYears(-5) && x <= now.AddDays(-1));
+    }
+
+    [TestMethod]
+    public void AfterNow_Always_CreateDatesBetweenNowAndFiveYearsInTheFuture()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTime>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.AfterNow().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddMinutes(1) && x <= now.AddYears(5));
+    }
+
+    [TestMethod]
+    public void AfterNowOffset_Always_CreateDatesBetweenNowAndFiveYearsInTheFuture()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTimeOffset>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.AfterNowOffset().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddMinutes(1) && x <= now.AddYears(5));
+    }
+
+    [TestMethod]
+    public void AfterToday_Always_CreateDatesBetweenNowAndFiveYearsInTheFuture()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTime>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.AfterToday().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddDays(1) && x <= now.AddYears(5));
+    }
+
+    [TestMethod]
+    public void AfterTodayOffset_Always_CreateDatesBetweenNowAndFiveYearsInTheFuture()
+    {
+        //Arrange
+        var now = Dummy.Create<DateTimeOffset>();
+        TimeProvider.Freeze(now);
+
+        //Act
+        var result = Dummy.Date.AfterTodayOffset().CreateMany(25).ToList();
+
+        //Assert
+        result.Should().OnlyContain(x => x >= now.AddDays(1) && x <= now.AddYears(5));
     }
 }

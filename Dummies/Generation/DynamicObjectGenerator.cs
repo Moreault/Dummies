@@ -4,9 +4,7 @@ internal static class DynamicObjectGenerator
 {
     private static readonly ProxyGenerator ProxyGenerator = new();
 
-    internal static T From<T>() => (T)From(typeof(T));
-
-    internal static object From(Type type)
+    public static object From(Type type)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
 

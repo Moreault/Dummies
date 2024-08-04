@@ -209,4 +209,18 @@ public abstract class DummyNumberBuilderTester<T> : Tester where T : INumber<T>,
         //Assert
         result.Should().OnlyContain(x => x.IsGreaterThanOrEqualTo(min) && x.IsLesserThanOrEqualTo(max));
     }
+
+    [TestMethod]
+    public void Create_WhenMaxIsSmallerThanMin_Throw()
+    {
+        //Arrange
+        var min = Dummy.Create<int>();
+        var max = Dummy.Number.LessThan(min).Create();
+
+        //Act
+        var action = () => Dummy.Number.Between(min, max).Create();
+
+        //Assert
+        action.Should().Throw<ArgumentException>().WithMessage(string.Format(ExceptionMessages.MaxMustBeGreaterThanMin, min, max));
+    }
 }

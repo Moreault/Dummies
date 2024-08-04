@@ -70,7 +70,7 @@ namespace ToolBX.Dummies.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Field {0} on {1} is not public.
         /// </summary>
         internal static string FieldIsNotPublic {
             get {
@@ -120,6 +120,15 @@ namespace ToolBX.Dummies.Resources {
         internal static string PropertyMustBeMutable {
             get {
                 return ResourceManager.GetString("PropertyMustBeMutable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string StartDateMustBeEarlier {
+            get {
+                return ResourceManager.GetString("StartDateMustBeEarlier", resourceCulture);
             }
         }
     }

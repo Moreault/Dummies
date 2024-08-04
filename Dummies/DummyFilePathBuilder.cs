@@ -2,7 +2,7 @@
 
 namespace ToolBX.Dummies;
 
-public interface IDummyPathBuilder
+public interface IDummyPathBuilder : ISpecializedBuilder<string>
 {
     IDummyPathRootBuilder WithRoot { get; }
     IDummyPathDepthBuilder WithDepth { get; }
@@ -14,16 +14,10 @@ public interface IDummyPathBuilder
     /// Character used to separate the path. By default, <see cref="Path.AltDirectorySeparatorChar"/> is used.
     /// </summary>
     IDummyPathBuilder WithSeparator(char separator);
-
-    string Create();
-    IEnumerable<string> CreateMany();
-    IEnumerable<string> CreateMany(int amount);
 }
 
-internal sealed class DummyPathBuilder : IDummyPathBuilder
+internal sealed class DummyPathBuilder : SpecializedBuilder<string>, IDummyPathBuilder
 {
-    private readonly IDummy _dummy;
-
     private char _separator = Path.AltDirectorySeparatorChar;
 
     internal Func<string> Root = DummyPathRootBuilder.GenerateWindowsRoot;
@@ -41,9 +35,8 @@ internal sealed class DummyPathBuilder : IDummyPathBuilder
     public IDummyPathSegmentLengthBuilder WithSegmentLength => new DummyPathSegmentLengthBuilder(this);
     public IDummyPathFileNameBuilder WithFileName => new DummyPathFileNameBuilder(this);
 
-    public DummyPathBuilder(IDummy dummy)
+    public DummyPathBuilder(IDummy dummy) : base(dummy)
     {
-        _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
     }
 
     public IDummyPathBuilder WithSeparator(char separator)
@@ -52,7 +45,7 @@ internal sealed class DummyPathBuilder : IDummyPathBuilder
         return this;
     }
 
-    public string Create()
+    public override string Create()
     {
         var sb = new StringBuilder();
 
@@ -77,14 +70,6 @@ internal sealed class DummyPathBuilder : IDummyPathBuilder
         }
 
         return sb.ToString();
-    }
-
-    public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<string> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
     }
 }
 

@@ -1,65 +1,61 @@
 ﻿namespace Dummies.Tests;
 
 [TestClass]
-public sealed class DummyOptionsTests
+public sealed class DummyOptionsTests : Tester
 {
     [TestMethod]
-    public void Reset_WhenNothingWasSet_StayUnset()
+    public void GlobalUniqueGenerationAttempts_WhenValueIsNegativeOrZero_SetToOne()
     {
         //Arrange
+        var value = Dummy.Number.LessThanOrEqualTo(0).Create();
 
         //Act
+        DummyOptions.Global.UniqueGenerationAttempts = value;
 
         //Assert
+        DummyOptions.Global.UniqueGenerationAttempts.Should().Be(1);
     }
 
     [TestMethod]
-    public void Reset_WhenValuesWereSet_ResetToGlobal()
+    public void GlobalUniqueGenerationAttempts_WhenValueIsGreaterThanZero_SetToThatValue()
     {
         //Arrange
+        var value = Dummy.Create<int>();
 
         //Act
+        DummyOptions.Global.UniqueGenerationAttempts = value;
 
         //Assert
+        DummyOptions.Global.UniqueGenerationAttempts.Should().Be(value);
     }
 
     [TestMethod]
-    public void DefaultCollectionSize_WhenLocalIsUnset_AlwaysUseGlobalValue()
+    public void UniqueGenerationAttempts_WhenValueIsNegativeOrZero_SetToOne()
     {
         //Arrange
+        var instance = new DummyOptions();
+        var value = Dummy.Number.LessThanOrEqualTo(0).Create();
 
         //Act
+        instance.UniqueGenerationAttempts = value;
 
         //Assert
+        instance.UniqueGenerationAttempts.Should().Be(1);
     }
 
     [TestMethod]
-    public void DefaultCollectionSize_WhenLocalIsSet_AlwaysUseLocalValue()
+    public void UniqueGenerationAttempts_WhenValueIsGreaterThanZero_SetToThatValue()
     {
         //Arrange
+        var instance = new DummyOptions();
+        var value = Dummy.Create<int>();
 
         //Act
+        instance.UniqueGenerationAttempts = value;
 
         //Assert
+        instance.UniqueGenerationAttempts.Should().Be(value);
     }
 
-    [TestMethod]
-    public void MaximumDepth_WhenLocalIsUnset_AlwaysUseGlobalValue()
-    {
-        //Arrange
 
-        //Act
-
-        //Assert
-    }
-
-    [TestMethod]
-    public void MaximumDepth_WhenLocalIsSet_AlwaysUseLocalValue()
-    {
-        //Arrange
-
-        //Act
-
-        //Assert
-    }
 }

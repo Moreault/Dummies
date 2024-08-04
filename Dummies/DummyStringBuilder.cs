@@ -1,12 +1,8 @@
 ﻿namespace ToolBX.Dummies;
 
-public interface IDummyStringBuilder
+public interface IDummyStringBuilder : ISpecializedBuilder<string>
 {
     IDummyStringLengthBuilder WithLength { get; }
-
-    string Create();
-    IEnumerable<string> CreateMany();
-    IEnumerable<string> CreateMany(int amount);
 }
 
 public interface IDummyStringLengthBuilder
@@ -17,28 +13,17 @@ public interface IDummyStringLengthBuilder
     IDummyStringBuilder LessThanOrEqualTo(int value);
 }
 
-internal sealed class DummyStringBuilder : IDummyStringBuilder
+internal sealed class DummyStringBuilder : SpecializedBuilder<string>, IDummyStringBuilder
 {
-    private readonly IDummy _dummy;
-
     internal Func<int> Length = () => 24;
 
-    internal DummyStringBuilder(IDummy dummy)
+    internal DummyStringBuilder(IDummy dummy) : base(dummy)
     {
-        _dummy = dummy;
     }
 
     public IDummyStringLengthBuilder WithLength => new DummyStringLengthBuilder(this);
 
-    public string Create() => RandomStringGenerator.Generate(Length());
-
-    public IEnumerable<string> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<string> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
-    }
+    public override string Create() => RandomStringGenerator.Generate(Length());
 }
 
 internal sealed class DummyStringLengthBuilder : IDummyStringLengthBuilder

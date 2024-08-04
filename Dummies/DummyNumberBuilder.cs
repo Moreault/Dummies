@@ -15,12 +15,7 @@ public interface IDummyNumberBuilder
     IEnumerable<T> CreateMany<T>(int amount) where T : INumber<T>, IMinMaxValue<T>;
 }
 
-public interface IDummyNumberBuilder<out T> where T : INumber<T>
-{
-    T Create();
-    IEnumerable<T> CreateMany();
-    IEnumerable<T> CreateMany(int amount);
-}
+public interface IDummyNumberBuilder<out T> : ISpecializedBuilder<T> where T : INumber<T>;
 
 internal sealed class DummyNumberBuilder : IDummyNumberBuilder
 {
@@ -50,12 +45,9 @@ internal sealed class DummyNumberBuilder : IDummyNumberBuilder
             yield return TryGenerateUnique(T.MinValue, T.MaxValue);
     }
 
-    private T TryGenerateUnique<T>(T min, T max, int attempts = 5) where T : INumber<T>
+    private T TryGenerateUnique<T>(T min, T max) where T : INumber<T>
     {
         if (min >= max) throw new ArgumentException(string.Format(ExceptionMessages.MaxMustBeGreaterThanMin, min, max));
-
-        if (attempts <= 0)
-            attempts = 1;
 
         T generated;
         var i = 0;
@@ -66,30 +58,20 @@ internal sealed class DummyNumberBuilder : IDummyNumberBuilder
             if (_dummy.TryGenerate(generated))
                 break;
 
-        } while (i < attempts);
+        } while (i < _dummy.Options.UniqueGenerationAttempts);
 
         return generated;
     }
 }
 
-internal sealed class DummyNumberBuilder<T> : IDummyNumberBuilder<T> where T : INumber<T>, IMinMaxValue<T>
+internal sealed class DummyNumberBuilder<T> : SpecializedBuilder<T>, IDummyNumberBuilder<T> where T : INumber<T>, IMinMaxValue<T>
 {
-    private readonly IDummy _dummy;
     private readonly Func<T> _factory;
 
-    internal DummyNumberBuilder(IDummy dummy, Func<T> factory)
+    internal DummyNumberBuilder(IDummy dummy, Func<T> factory) : base(dummy)
     {
-        _dummy = dummy;
         _factory = factory;
     }
 
-    public T Create() => _factory();
-
-    public IEnumerable<T> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<T> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return _factory();
-    }
+    public override T Create() => _factory();
 }

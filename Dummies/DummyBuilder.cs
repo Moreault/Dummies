@@ -312,7 +312,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 {
                     if (typeof(T).IsAbstract)
                     {
-                        instance = DynamicObjectGenerator.From<T>();
+                        instance = DynamicObjectGenerator.From(typeof(T));
                     }
                     else if (typeof(T).IsEnum)
                     {

@@ -119,4 +119,7 @@
 	<data name="FieldIsNotPublic" xml:space="preserve">
 		<value>Le champ {0} sur le type {1} n'est pas publique</value>
 	</data>
+	<data name="StartDateMustBeEarlier" xml:space="preserve">
+		<value>La date de départ doit être avant la date de fin</value>
+	</data>
 </root>

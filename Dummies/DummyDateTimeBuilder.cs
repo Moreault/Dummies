@@ -2,12 +2,44 @@
 
 public interface IDummyDateTimeBuilder
 {
+    /// <summary>
+    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Use <see cref="Before(DateTime)"/> for more precise control.
+    /// </summary>
+    IDummyDateTimeBuilderLastStep BeforeNow();
+
+    /// <summary>
+    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Use <see cref="Before(DateTimeOffset)"/> or <see cref="Between(DateTimeOffset,DateTimeOffset)"/> for more precise control.
+    /// </summary>
+    IDummyDateTimeOffsetBuilderLastStep BeforeNowOffset();
+
+    /// <summary>
+    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Use <see cref="Before(DateTime)"/> or <see cref="Between(DateTime,DateTime)"/> for more precise control.
+    /// </summary>
+    IDummyDateTimeBuilderLastStep BeforeToday();
+
+    /// <summary>
+    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Use <see cref="Before(DateTimeOffset)"/> or <see cref="Between(DateTimeOffset,DateTimeOffset)"/> for more precise control.
+    /// </summary>
+    IDummyDateTimeOffsetBuilderLastStep BeforeTodayOffset();
+
     IDummyDateTimeBuilderLastStep Before(DateTime value);
     IDummyDateTimeOffsetBuilderLastStep Before(DateTimeOffset value);
     IDummyDateOnlyBuilder Before(DateOnly value);
+
+    IDummyDateTimeBuilderLastStep AfterNow();
+    IDummyDateTimeOffsetBuilderLastStep AfterNowOffset();
+
+    IDummyDateTimeBuilderLastStep AfterToday();
+    IDummyDateTimeOffsetBuilderLastStep AfterTodayOffset();
+
     IDummyDateTimeBuilderLastStep After(DateTime value);
     IDummyDateTimeOffsetBuilderLastStep After(DateTimeOffset value);
     IDummyDateOnlyBuilder After(DateOnly value);
+
     IDummyDateTimeBuilderLastStep Between(DateTime min, DateTime max);
     IDummyDateTimeOffsetBuilderLastStep Between(DateTimeOffset min, DateTimeOffset max);
     IDummyDateOnlyBuilder Between(DateOnly min, DateOnly max);
@@ -35,9 +67,57 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
         _dummy = dummy;
     }
 
+    public IDummyDateTimeBuilderLastStep BeforeNow()
+    {
+        var now = TimeProvider.TimeProvider.Now.UtcDateTime.AddMinutes(-1);
+        return Between(now.AddYears(-5), now);
+    }
+
+    public IDummyDateTimeOffsetBuilderLastStep BeforeNowOffset()
+    {
+        var now = TimeProvider.TimeProvider.Now.AddMinutes(-1);
+        return Between(now.AddYears(-5), now);
+    }
+
+    public IDummyDateTimeBuilderLastStep BeforeToday()
+    {
+        var today = TimeProvider.TimeProvider.Now.UtcDateTime.AddDays(-1);
+        return Between(today.AddYears(-5), today);
+    }
+
+    public IDummyDateTimeOffsetBuilderLastStep BeforeTodayOffset()
+    {
+        var today = TimeProvider.TimeProvider.Now.AddDays(-1);
+        return Between(today.AddYears(-5), today);
+    }
+
     public IDummyDateTimeBuilderLastStep Before(DateTime value) => Between(DateTime.MinValue, value);
 
     public IDummyDateOnlyBuilder Before(DateOnly value) => Between(DateOnly.MinValue, value);
+
+    public IDummyDateTimeBuilderLastStep AfterNow()
+    {
+        var now = TimeProvider.TimeProvider.Now.UtcDateTime.AddMinutes(1);
+        return Between(now, now.AddYears(5));
+    }
+
+    public IDummyDateTimeOffsetBuilderLastStep AfterNowOffset()
+    {
+        var now = TimeProvider.TimeProvider.Now.AddMinutes(1);
+        return Between(now, now.AddYears(5));
+    }
+
+    public IDummyDateTimeBuilderLastStep AfterToday()
+    {
+        var today = TimeProvider.TimeProvider.Now.UtcDateTime.AddDays(1);
+        return Between(today, today.AddYears(5));
+    }
+
+    public IDummyDateTimeOffsetBuilderLastStep AfterTodayOffset()
+    {
+        var today = TimeProvider.TimeProvider.Now.AddDays(1);
+        return Between(today, today.AddYears(5));
+    }
 
     public IDummyDateTimeBuilderLastStep After(DateTime value) => Between(value, DateTime.MaxValue);
 
@@ -46,7 +126,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
     public IDummyDateTimeBuilderLastStep Between(DateTime min, DateTime max) => new DummyDateTimeBuilderLastStep(_dummy, () =>
     {
         if (min > max)
-            throw new ArgumentException("Start date must be earlier than end date.");
+            throw new ArgumentException(ExceptionMessages.StartDateMustBeEarlier);
 
         var timeSpan = max - min;
         var randomSeconds = PseudoRandomNumberGenerator.Shared.Generate(0, timeSpan.TotalSeconds);
@@ -60,7 +140,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
     public IDummyDateTimeOffsetBuilderLastStep Between(DateTimeOffset min, DateTimeOffset max) => new DummyDateTimeOffsetBuilderLastStep(_dummy, () =>
     {
         if (min > max)
-            throw new ArgumentException("Start date must be earlier than end date.");
+            throw new ArgumentException(ExceptionMessages.StartDateMustBeEarlier);
 
         var timeSpan = max - min;
         var randomSeconds = PseudoRandomNumberGenerator.Shared.Generate(0, timeSpan.TotalSeconds);
@@ -70,7 +150,7 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
     public IDummyDateOnlyBuilder Between(DateOnly min, DateOnly max) => new DummyDateOnlyBuilder(_dummy, () =>
     {
         if (min > max)
-            throw new ArgumentException("Start date must be earlier than end date.");
+            throw new ArgumentException(ExceptionMessages.StartDateMustBeEarlier);
 
         var range = max.DayNumber - min.DayNumber;
         var randomDays = PseudoRandomNumberGenerator.Shared.Generate(0, range + 1);
@@ -108,62 +188,32 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
     }
 }
 
-public interface IDummyDateTimeBuilderLastStep
-{
-    DateTime Create();
-    IEnumerable<DateTime> CreateMany();
-    IEnumerable<DateTime> CreateMany(int amount);
-}
+public interface IDummyDateTimeBuilderLastStep : ISpecializedBuilder<DateTime>;
 
-internal sealed class DummyDateTimeBuilderLastStep : IDummyDateTimeBuilderLastStep
+internal sealed class DummyDateTimeBuilderLastStep : SpecializedBuilder<DateTime>, IDummyDateTimeBuilderLastStep
 {
-    private readonly IDummy _dummy;
     private readonly Func<DateTime> _factory;
 
-    internal DummyDateTimeBuilderLastStep(IDummy dummy, Func<DateTime> factory)
+    internal DummyDateTimeBuilderLastStep(IDummy dummy, Func<DateTime> factory) : base(dummy)
     {
-        _dummy = dummy;
         _factory = factory;
     }
 
-    public DateTime Create() => _factory();
-
-    public IEnumerable<DateTime> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<DateTime> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
-    }
+    public override DateTime Create() => _factory();
 }
 
-public interface IDummyDateTimeOffsetBuilderLastStep
-{
-    DateTimeOffset Create();
-    IEnumerable<DateTimeOffset> CreateMany();
-    IEnumerable<DateTimeOffset> CreateMany(int amount);
-}
+public interface IDummyDateTimeOffsetBuilderLastStep : ISpecializedBuilder<DateTimeOffset>;
 
-internal sealed class DummyDateTimeOffsetBuilderLastStep : IDummyDateTimeOffsetBuilderLastStep
+internal sealed class DummyDateTimeOffsetBuilderLastStep : SpecializedBuilder<DateTimeOffset>, IDummyDateTimeOffsetBuilderLastStep
 {
-    private readonly IDummy _dummy;
     private readonly Func<DateTimeOffset> _factory;
 
-    internal DummyDateTimeOffsetBuilderLastStep(IDummy dummy, Func<DateTimeOffset> factory)
+    internal DummyDateTimeOffsetBuilderLastStep(IDummy dummy, Func<DateTimeOffset> factory) : base(dummy)
     {
-        _dummy = dummy;
         _factory = factory;
     }
 
-    public DateTimeOffset Create() => _factory();
-
-    public IEnumerable<DateTimeOffset> CreateMany() => CreateMany(_dummy.Options.DefaultCollectionSize);
-
-    public IEnumerable<DateTimeOffset> CreateMany(int amount)
-    {
-        for (var i = 0; i < amount; i++)
-            yield return Create();
-    }
+    public override DateTimeOffset Create() => _factory();
 }
 
 public interface IDummyDateOnlyBuilder
