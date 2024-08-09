@@ -69,26 +69,26 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public IDummyDateTimeBuilderLastStep BeforeNow()
     {
-        var now = TimeProvider.TimeProvider.Now.UtcDateTime.AddMinutes(-1);
-        return Between(now.AddYears(-5), now);
+        var now = TimeProvider.TimeProvider.Now.UtcDateTime;
+        return Between(now.AddYears(-5), now.AddMinutes(-1));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep BeforeNowOffset()
     {
-        var now = TimeProvider.TimeProvider.Now.AddMinutes(-1);
-        return Between(now.AddYears(-5), now);
+        var now = TimeProvider.TimeProvider.Now;
+        return Between(now.AddYears(-5), now.AddMinutes(-1));
     }
 
     public IDummyDateTimeBuilderLastStep BeforeToday()
     {
-        var today = TimeProvider.TimeProvider.Now.UtcDateTime.AddDays(-1);
-        return Between(today.AddYears(-5), today);
+        var today = TimeProvider.TimeProvider.Now.UtcDateTime;
+        return Between(today.AddYears(-5), today.AddDays(-1));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep BeforeTodayOffset()
     {
-        var today = TimeProvider.TimeProvider.Now.AddDays(-1);
-        return Between(today.AddYears(-5), today);
+        var today = TimeProvider.TimeProvider.Now;
+        return Between(today.AddYears(-5), today.AddDays(-1));
     }
 
     public IDummyDateTimeBuilderLastStep Before(DateTime value) => Between(DateTime.MinValue, value);
@@ -97,26 +97,26 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public IDummyDateTimeBuilderLastStep AfterNow()
     {
-        var now = TimeProvider.TimeProvider.Now.UtcDateTime.AddMinutes(1);
-        return Between(now, now.AddYears(5));
+        var now = TimeProvider.TimeProvider.Now.UtcDateTime;
+        return Between(now.AddMinutes(1), now.AddYears(5));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep AfterNowOffset()
     {
-        var now = TimeProvider.TimeProvider.Now.AddMinutes(1);
-        return Between(now, now.AddYears(5));
+        var now = TimeProvider.TimeProvider.Now;
+        return Between(now.AddMinutes(1), now.AddYears(5));
     }
 
     public IDummyDateTimeBuilderLastStep AfterToday()
     {
-        var today = TimeProvider.TimeProvider.Now.UtcDateTime.AddDays(1);
-        return Between(today, today.AddYears(5));
+        var today = TimeProvider.TimeProvider.Now.UtcDateTime;
+        return Between(today.AddDays(1), today.AddYears(5));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep AfterTodayOffset()
     {
-        var today = TimeProvider.TimeProvider.Now.AddDays(1);
-        return Between(today, today.AddYears(5));
+        var today = TimeProvider.TimeProvider.Now;
+        return Between(today.AddDays(1), today.AddYears(5));
     }
 
     public IDummyDateTimeBuilderLastStep After(DateTime value) => Between(value, DateTime.MaxValue);

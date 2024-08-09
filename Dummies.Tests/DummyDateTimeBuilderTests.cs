@@ -6,6 +6,20 @@ namespace Dummies.Tests;
 public sealed class DummyDateTimeBuilderTests : Tester
 {
     [TestMethod]
+    public void Between_WhenMinIsGreaterThanMax_Throw()
+    {
+        //Arrange
+        var min = Dummy.Create<DateTime>();
+        var max = Dummy.Date.Before(min).Create();
+
+        //Act
+        var action = () => Dummy.Date.Between(min, max).Create();
+
+        //Assert
+        action.Should().Throw<ArgumentException>().WithMessage(ExceptionMessages.StartDateMustBeEarlier);
+    }
+
+    [TestMethod]
     public void Between_Always_CreateDateBetweenTheTwo()
     {
         //Arrange
@@ -40,6 +54,20 @@ public sealed class DummyDateTimeBuilderTests : Tester
     }
 
     [TestMethod]
+    public void BetweenOffset_WhenMinIsGreaterThanMax_Throw()
+    {
+        //Arrange
+        var min = Dummy.Create<DateTimeOffset>();
+        var max = Dummy.Date.Before(min).Create();
+
+        //Act
+        var action = () => Dummy.Date.Between(min, max).Create();
+
+        //Assert
+        action.Should().Throw<ArgumentException>().WithMessage(ExceptionMessages.StartDateMustBeEarlier);
+    }
+
+    [TestMethod]
     public void BetweenOffset_Always_CreateDateBetweenTheTwo()
     {
         //Arrange
@@ -71,6 +99,20 @@ public sealed class DummyDateTimeBuilderTests : Tester
 
         //Assert
         result.Should().OnlyContain(x => x >= min && x <= max);
+    }
+
+    [TestMethod]
+    public void BetweenDateOnly_WhenMinIsGreaterThanMax_Throw()
+    {
+        //Arrange
+        var min = Dummy.Create<DateOnly>();
+        var max = Dummy.Date.Before(min).Create();
+
+        //Act
+        var action = () => Dummy.Date.Between(min, max).Create();
+
+        //Assert
+        action.Should().Throw<ArgumentException>().WithMessage(ExceptionMessages.StartDateMustBeEarlier);
     }
 
     [TestMethod]

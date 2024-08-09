@@ -254,13 +254,15 @@ public sealed class DummyFilePathBuilderTests : Tester
     public void Create_WhenUsedWithFileNameExtensionAlways_ReturnDifferentPathsAndFileNamesWithSameExtension()
     {
         //Arrange
+        const int count = 25;
+
         var extension = Dummy.String.WithLength.Exactly(3).Create();
 
         //Act
-        var result = Dummy.Path.WithFileName.WithExtension.Always(extension).CreateMany(10).ToList();
+        var result = Dummy.Path.WithFileName.WithExtension.Always(extension).CreateMany(count).ToList();
 
         //Assert
-        result.Distinct().Should().HaveCount(10);
+        result.Distinct().Should().HaveCount(count);
         foreach (var path in result)
             Path.GetExtension(path).Trim('.').Should().Be(extension);
     }
@@ -271,12 +273,13 @@ public sealed class DummyFilePathBuilderTests : Tester
     public void Create_WhenUsedWithFileNameExtensionLengthBetween_ReturnDifferentPathsWithExtensionsBetweenLengths(int min, int max)
     {
         //Arrange
+        const int count = 25;
 
         //Act
-        var result = Dummy.Path.WithFileName.WithExtension.WithLengthBetween(min, max).CreateMany(10).ToList();
+        var result = Dummy.Path.WithFileName.WithExtension.WithLengthBetween(min, max).CreateMany(count).ToList();
 
         //Assert
-        result.Distinct().Should().HaveCount(10);
+        result.Distinct().Should().HaveCount(count);
         var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
         extensions.Distinct().Count().Should().BeGreaterThan(1);
         extensions.Should().OnlyContain(x => x.Length >= min && x.Length <= max);
@@ -289,12 +292,13 @@ public sealed class DummyFilePathBuilderTests : Tester
     public void Create_WhenUSedWithFileNameExtensionWithLength_ReturnDifferentExtensionsOfSameLength(int length)
     {
         //Arrange
+        const int count = 25;
 
         //Act
-        var result = Dummy.Path.WithFileName.WithExtension.WithLength(length).CreateMany(10).ToList();
+        var result = Dummy.Path.WithFileName.WithExtension.WithLength(length).CreateMany(count).ToList();
 
         //Assert
-        result.Distinct().Should().HaveCount(10);
+        result.Distinct().Should().HaveCount(count);
         var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
         extensions.Distinct().Count().Should().BeGreaterThan(1);
         extensions.Should().OnlyContain(x => x.Length == length);
@@ -304,13 +308,15 @@ public sealed class DummyFilePathBuilderTests : Tester
     public void Create_WhenUsedWithFileNameExtensionOneOf_ReturnRandomExtensionsFromProvidedList()
     {
         //Arrange
+        const int count = 25;
+
         var possibleExtensions = new List<string> { "mp3", "ogg", "img" };
 
         //Act
-        var result = Dummy.Path.WithFileName.WithExtension.OneOf(possibleExtensions).CreateMany(10).ToList();
+        var result = Dummy.Path.WithFileName.WithExtension.OneOf(possibleExtensions).CreateMany(count).ToList();
 
         //Assert
-        result.Distinct().Should().HaveCount(10);
+        result.Distinct().Should().HaveCount(count);
         var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
         extensions.Distinct().Count().Should().BeGreaterThan(1);
         extensions.Should().OnlyContain(x => x == "mp3" || x == "ogg" || x == "img");
@@ -320,11 +326,13 @@ public sealed class DummyFilePathBuilderTests : Tester
     public void Create_WhenUsedWithFileNameExtensionOneOfWithParams_ReturnRandomExtensionsFromProvidedList()
     {
         //Arrange
+        const int count = 25;
+
         //Act
-        var result = Dummy.Path.WithFileName.WithExtension.OneOf("mp3", "ogg", "img").CreateMany(10).ToList();
+        var result = Dummy.Path.WithFileName.WithExtension.OneOf("mp3", "ogg", "img").CreateMany(count).ToList();
 
         //Assert
-        result.Distinct().Should().HaveCount(10);
+        result.Distinct().Should().HaveCount(count);
         var extensions = result.Select(x => Path.GetExtension(x).Trim('.')).ToList();
         extensions.Distinct().Count().Should().BeGreaterThan(1);
         extensions.Should().OnlyContain(x => x == "mp3" || x == "ogg" || x == "img");

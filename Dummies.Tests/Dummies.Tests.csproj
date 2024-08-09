@@ -19,6 +19,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="ToolBX.Mathemancy" Version="2.2.1" />
+		<PackageReference Include="ToolBX.SmartyStrings" Version="2.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
