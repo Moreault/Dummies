@@ -1,5 +1,6 @@
 global using System.Collections;
 global using System.Collections.Immutable;
+global using System.Globalization;
 global using System.Linq.Expressions;
 global using System.Numerics;
 global using System.Reflection;
@@ -16,3 +17,4 @@ global using ToolBX.Dummies.Resources;
 global using ToolBX.Mathemancy;
 global using ToolBX.OPEX;
 global using ToolBX.Reflection4Humans.Extensions;
+global using ToolBX.SmartyStrings;

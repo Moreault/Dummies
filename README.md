@@ -1,7 +1,9 @@
 ![Dummies](https://github.com/Moreault/Dummies/blob/master/dummies.png)
 # Dummies
 
-:warning: This project is still in early development. It is not yet ready for production.
+:warning: This project is still in pre-release
+
+Dummies makes it easier to write unit tests by automating part of, or the entirety of, the creation of objects. It is flexible and allows you to customize how some objects are generated. It draws a lot of inspiration from [AutoFixture](https://github.com/AutoFixture/AutoFixture) and the two look a lot alike on the surface. If you are familiar with AutoFixture, then Dummies should come naturally to you.
 
 ## Getting Started
 
@@ -17,18 +19,19 @@ var people = dummy.CreateMany<Person>(10);
 
 The `Dummy` class is the main entry point of the library. It is used to create dummy objects. It is smart enough to create most objects, including from interfaces and abstract classes, with little to no setup required.
 
-## Customizations
+## Customizing generation
 
-Customizations can be applied to the `Dummy` class to change the way it creates objects. Dummies come preloaded with many customizations for common base types, such as `string`, `int`, `DateTime`, etc. Customizations can be applied to any type, including interfaces and abstract classes. These base customizations can also be overriden if they do not meet your needs.
+Customizations may be applied to a `Dummy` instance to control the way it generates objects of a given type. They may also be applied project-wide using the `[AutoCustomization]` attribute.
+
+The following examples are taken from the Sample project.
 
 ### `ICustomization`
-This non-generic `ICustomization` interface is generally used to deal with open generics but it is not limited to it. It can be used to customize any type.
+Base interface for all customizations. For most cases, you should use one of the abstract classes which do most of the heavy lifting for common use cases. Use `ICustomization` when none of the base customization classes cover your needs.
 
 ```cs
 public class MyCustomization : ICustomization
 {
-	//Notice that the types are open generics
-	public IEnumerable<Type> Types { get; } = [typeof(MyType<>), typeof(IMyType<>)];
+    public Func<Type, bool> Condition => x == typeof(MyType);
 
 	public IDummyBuilder Build(Dummy dummy, Type type)
 	{
@@ -40,35 +43,77 @@ public class MyCustomization : ICustomization
 }
 ```
 
-### `ICustomization<T>`
-This generic `ICustomization<T>` interface is used to customize a specific type. It can also be used for other types related to `T`, such as interfaces and abstract classes. For most use cases, you can actually inherit from `CustomizationBase<T>` instead of implementing this interface directly.
+### CustomizationBase
+Again, this one should only be used directly when you're working with very uncommon cases that are not covered by more "specialized" customizations.
+
+### CustomizationBase<T>
+Preferred way of handling customizations when you are not testing generic types (such as an `IEnumerable<T>` for instance).
+
+Note that the example does not use the `FromFactory` method. Indeed, `FromFactory` is not always required. The `Build` method only expects a `IDummyBuilder<T>` to be returned. 
+Not using the `Factory` method ensures that other properties and fields will use default (or customized) generation. 
+If you come from AutoFixture, you may be surprised to learn that Dummy's `FromFactory` method omits all properties and fields by default. 
 
 ```cs
-public class MyCustomization<T> : ICustomization<T>
+//Follows the assumption that MyType's Id is a numeric string
+[AutoCustomization]
+public sealed class MyTypeCustomization : CustomizationBase<MyType>
 {
-	//You do still need to specify these (done automatically if you inherit from CustomizationBase<T>)
-	public IEnumerable<Type> Types { get; } = [typeof(T)];
+    protected override IEnumerable<Type> AdditionalTypes { get; } = [typeof(IMyType)];
 
-	IDummyBuilder ICustomization.Build(Dummy dummy, Type type) => Build(dummy);
-
-    public IDummyBuilder<T> Build(Dummy dummy)
-	{
-		return dummy.Build<T>().With(x => x.MyProperty, "MyValue");
-	}
+    public override IDummyBuilder<MyType> Build(IDummy dummy) => dummy.Build<MyType>().With(x => x.Id, x => x.Create<int>().ToString());
 }
 ```
 
-### `CustomizationBase<T>`
-This class implements `ICustomization<T>` and provides a default implementation for `ICustomization`. It is recommended (but not required) to inherit from this class instead of implementing `ICustomization<T>` directly.
+### OpenGenericCustomizationBase
+Use this base customization when working with open generics.
 
 ```cs
-public class MyCustomization<T> : CustomizationBase<T>
+//When the generic type argument (Id) is a string, make it numeric but don't do any special manipulation if it's any other type
+[AutoCustomization]
+public sealed class MyGenericTypeCustomization : OpenGenericCustomizationBase
 {
-	//The Types property is automatically set to [typeof(T)] but it can also be overriden if you need it to apply to more than one type
-	public override IDummyBuilder<T> Build(Dummy dummy)
-	{
-		return dummy.Build<T>().With(x => x.MyProperty, "MyValue");
-	}
+    protected override IEnumerable<Type> Types { get; } = [typeof(MyGenericType<>), typeof(IMyGenericType<>)];
+    
+    protected override object FromFactory<T>(IDummy dummy)
+    {
+        if (typeof(T) == typeof(string))
+            return new MyGenericType<string> { Id = dummy.Create<int>().ToString() };
+        return new MyGenericType<T> { Id = dummy.Create<T>() };
+    }
+}
+```
+
+There are overloads to the `FromFactory` method with up to ten generic arguments.
+
+```cs
+[AutoCustomization]
+public sealed class MyGenericTypeCustomization : OpenGenericCustomizationBase
+{
+    protected override IEnumerable<Type> Types { get; } = [typeof(MyGenericType<,>), typeof(IMyGenericType<,>)];
+    
+    protected override object FromFactory<T1, T2>(IDummy dummy)
+    {
+        ...
+    }
+}
+```
+
+If you need more than ten generic arguments or if you have other needs in terms of open generics, I would recommend using `ICustomization` or `CustomizationBase`.
+
+### GenericCollectionCustomizationBase
+Base customization for generic collections. You typically shouldn't need to inherit this directly but it could happen if you're working with a complex collection. 
+
+```cs
+public abstract class ListCustomizationBase : GenericCollectionCustomizationBase
+{
+    protected override object Factory(IDummy dummy, Type type)
+    {
+        var genericType = type.GetGenericArguments().Single();
+        var list = CreateEnumerable(dummy, genericType);
+        return GetType().GetSingleMethod(x => x.Name == nameof(Convert) && !x.IsAbstract).MakeGenericMethod(genericType).Invoke(this, [list])!;
+    }
+
+    protected abstract object Convert<T>(IEnumerable<T> source);
 }
 ```
 
@@ -86,6 +131,9 @@ public class MyCustomListCustomization : ListCustomizationBase
 }
 ```
 
+### ArrayCustomizationBase
+This one might not have many applications outside of `System.Array` but it's still kept open for use just in case.
+
 ### `DictionaryCustomizationBase`
 This customization works much in the same way as `ListCustomizationBase` but for dictionary-like collections.
 
@@ -98,6 +146,16 @@ public class MyCustomDictionaryCustomization : DictionaryCustomizationBase
 	//This could be a ToMyCustomDictionary() extension method as well or whatever code is required to convert from an IEnumerable<KeyValuePair<TKey, TValue>> to your custom dictionary
 	protected override object Convert<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> source) => new MyCustomDictionary<TKey, TValue>(source);
 }
+```
+
+### GenericStackCustomizationBase
+Internally, this is just the `ListCustomizationBase`. Use when working with stack-like collections.
+
+### IntegerCustomizationBase
+This is used to generate generic integers. Here is how it is implemented for `Int16` for instance.
+
+```cs
+public sealed class Int16Customization : IntegerCustomizationBase<short>;
 ```
 
 ### The `[AutoCustomization]` attribute
@@ -117,6 +175,8 @@ public class MyCustomization : ICustomization
 ```
 
 Bear in mind that `[AutoCustomization]` should only be used when you want to apply a customization globally. If you want to apply a customization to a specific test case, you should use `Dummy.Customize` instead. `Dummy.Customize` will always take precedence over `[AutoCustomization]`.
+
+It's also important to note that you can even override default customizations provided by Dummies by using `[AutoCustomization]`.
 
 ## `Dummy.Build` and the `IDummyBuilder` interface
 Whenever you use `Dummy.Build<T>`, you get an `IDummyBuilder<T>` instance. This interface is used to customize the object that will be created. It is also used to create the object itself when you call `IDummyBuilder<T>.Create` or `IDummyBuilder<T>.CreateMany`.
@@ -140,6 +200,7 @@ var people = dummy.Build<Person>()
 	.CreateMany(10);
 ```
 
+### The `WithoutCustomizations` method
 When a property is not specified, it will be generated automatically based on that type's currently loaded `ICustomization`. It is also important to note that the Dummies framework allows you to build on top of customizations. This means that whenever you use `Build`, it will use that type's customization (if there is any) and apply your case-specific additions afterwards. You can also opt out of this by using the chainable `IDummyBuilder.WithoutCustomizations()` method.
 
 ```cs
@@ -251,7 +312,25 @@ var airplane = dummy.Build<Airplane>()
 ```
 
 ### `As<T>`
-This is used to specify a type to cast the "internal" object to.
+This is used to cast the `IDummyBuilder` to generic `IDummyBuilder<T>` type. This is generally used when you have a (non-generic) `IDummyBuilder` interface to work with which is often the case when working with customizations. It could also be used when you might need to change an interface to a concrete type.
+
+```cs
+var builder = customization.Build(_dummy, typeof(T)).As<T>();
+```
+
+### FromTypes
+Use this if you want to create a random type implementing or inheriting a base type.
+
+```cs
+public interface IGarbage;
+public sealed record GarbageOne : IGarbage;
+public sealed record GarbageTwo : IGarbage;
+public sealed record GarbageThree : IGarbage;
+
+...
+
+var result = Dummy.Build<IGarbage>().FromTypes(typeof(GarbageOne), typeof(GarbageTwo), typeof(GarbageThree)).CreateMany(10).ToList();
+```
 
 ## Excluding enum values from generation
 By default, Dummies will generate a random enum value for any enum type. You can exclude values from being generated by using the `Dummy.Exclude` method. This method is on both `Dummy` and `IDummyBuilder` and is also chainable in both cases.
