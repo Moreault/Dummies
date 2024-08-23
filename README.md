@@ -391,11 +391,11 @@ It can be used similarly to the `Exclude` method except that it's a one-time gen
 
 ```cs
 //Without additional instructions, this is the equivalent of calling Dummy.Create<T>()
-var result = dummy.Enum<T>.Create();
+var result = dummy.Enum()<T>.Create();
 
 //Will always only return either One or Three
-var result = dummy.Enum<T>.OneOf(SomeEnum.One, SomeEnum.Three).Create();
+var result = dummy.Enum()<T>.OneOf(SomeEnum.One, SomeEnum.Three).Create();
 
 //Will always only return either One or Three
-var result = dummy.Enum<T>.Exclude(SomeEnum.Two).Create();
+var result = dummy.Enum()<T>.Exclude(SomeEnum.Two).Create();
 ```
