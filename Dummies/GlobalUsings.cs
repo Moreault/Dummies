@@ -18,6 +18,7 @@ global using ToolBX.Dummies.Generation;
 global using ToolBX.Dummies.Resources;
 global using ToolBX.Mathemancy.Randomness;
 global using ToolBX.OPEX;
+global using ToolBX.OPEX.Utilities;
 global using ToolBX.OutWarden;
 global using ToolBX.Reflection4Humans.Extensions;
 global using ToolBX.Reflection4Humans.TypeFetcher;

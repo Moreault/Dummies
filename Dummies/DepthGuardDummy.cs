@@ -21,6 +21,8 @@ internal sealed class DepthGuardDummy : IDummy
         CurrentDepth = currentDepth;
     }
 
+    public IDummyEnumBuilder<T> Enum<T>() where T : Enum => _dummy.Enum<T>();
+
     public T Create<T>() => _dummy.Create<T>(CurrentDepth);
 
     public object Create(Type type) => _dummy.Create(type, CurrentDepth);

@@ -29,6 +29,11 @@ public interface IDummy
     /// </summary>
     IDummyPathBuilder Path { get; }
 
+    /// <summary>
+    /// Generates custom enum values.
+    /// </summary>
+    IDummyEnumBuilder<T> Enum<T>() where T : Enum;
+
     T Create<T>();
     object Create(Type type);
     IEnumerable<T> CreateMany<T>();
@@ -77,6 +82,8 @@ public sealed class Dummy : IDummy
     public IDummyFileNameBuilder FileName => new DummyFileNameBuilder(this);
 
     public IDummyPathBuilder Path => new DummyPathBuilder(this);
+
+    public IDummyEnumBuilder<T> Enum<T>() where T : Enum => new DummyEnumBuilder<T>(this);
 
     public T Create<T>()
     {

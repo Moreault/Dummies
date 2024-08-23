@@ -312,7 +312,7 @@ var airplane = dummy.Build<Airplane>()
 ```
 
 ### `As<T>`
-This is used to cast the `IDummyBuilder` to generic `IDummyBuilder<T>` type. This is generally used when you have a (non-generic) `IDummyBuilder` interface to work with which is often the case when working with customizations. It could also be used when you might need to change an interface to a concrete type.
+This is used to cast the `IDummyBuilder` to generic `IDummyBuilder<T>` type. This is generally recommended when you have a (non-generic) `IDummyBuilder` interface to work with which is often the case when working with customizations. It could also be used when you might need to change an interface to a concrete type.
 
 ```cs
 var builder = customization.Build(_dummy, typeof(T)).As<T>();
@@ -384,4 +384,18 @@ var result = dummy.String.WithLength.Exactly(10).Create();
 var result = dummy.String.WithLength.LessThan(24).Create();
 
 var result = dummy.String.WithLength.Between(75, 100).CreateMany();
+```
+
+## The `DummyEnumBuilder`
+It can be used similarly to the `Exclude` method except that it's a one-time generator whereas `Exclude` is meant to be excluded for an entire builder's lifetime. Bear in mind that using the `Exclude` method and the `DummyEnumBuilder` together may yield unexpected results. 
+
+```cs
+//Without additional instructions, this is the equivalent of calling Dummy.Create<T>()
+var result = dummy.Enum<T>.Create();
+
+//Will always only return either One or Three
+var result = dummy.Enum<T>.OneOf(SomeEnum.One, SomeEnum.Three).Create();
+
+//Will always only return either One or Three
+var result = dummy.Enum<T>.Exclude(SomeEnum.Two).Create();
 ```

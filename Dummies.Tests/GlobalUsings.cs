@@ -16,5 +16,6 @@ global using ToolBX.Dummies.Exceptions;
 global using ToolBX.Dummies.Resources;
 global using ToolBX.Mathemancy;
 global using ToolBX.OPEX;
+global using ToolBX.OPEX.Utilities;
 global using ToolBX.Reflection4Humans.Extensions;
 global using ToolBX.SmartyStrings;
