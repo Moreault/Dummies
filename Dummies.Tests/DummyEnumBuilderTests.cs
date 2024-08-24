@@ -96,6 +96,5 @@ public sealed class DummyEnumBuilderTests : Tester
 
         //Assert
         result.Distinct().Should().BeEquivalentTo(new List<GarbageEnum> { GarbageEnum.One, GarbageEnum.Two, GarbageEnum.Four, GarbageEnum.Five });
-
     }
 }

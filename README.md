@@ -365,14 +365,44 @@ The enum values will also be excluded from any other properties or fields that a
 You can use the `Dummy.Number` property to have more control over how numbers are generated such as `LessThan`, `GreaterThan` and `Between`. Do keep in mind that using the `IDummyNumberGenerator` will bypass any customizations that are loaded for that type. To use number customizations, you should use `Dummy.Create<int>` (where `int` is the type of number you want to generate). This builder will also attempt to return unique numbers each time but it may give up on that if the range is very limited.
 
 ```cs
+//Generates a number between 5 and 10
+var result = Dummy.Number.Between(5, 10).Create();
 
+//Geneates any number less than 100 (including negative numbers)
+var result = Dummy.Number.LessThan(100).Create();
+
+//Generates any number greater than or equal to 50
+var result = Dummy.Number.GreaterThanOrEqualTo(50).Create();
 ```
 
 ## The `DateTimeDummyBuilder`
 You can use the `Dummy.DateTime` property to have more control over how `DateTime` objects are generated such as `Before`, `After` and `Between`. Do keep in mind that using the `IDateTimeDummyBuilder` will bypass any customizations that are loaded for that type. To use `DateTime` customizations, you should use `Dummy.Create<DateTime>`. This builder will also attempt to return unique `DateTime` objects each time but it may give up on that if the range is very limited between two dates.
 
-```cs
+This builder also allows `DateTimeOffset` and `DateOnly` manipulations.
 
+It also includes the concept of "Now" and "Today" as relative values. These are compatible with ToolBX.TimeProvider.
+
+```cs
+//Generates a DateOnly, DateTime or DateTimeOffset (depending on types used) between date1 and date2
+var result = Dummy.Date.Between(date1, date2).Create();
+
+//Generates a date set after the date passed
+var result = Dummy.Date.After(date).Create();
+
+//Generates a date set before the date passed
+var result = Dummy.Date.Before(date).Create();
+
+//Generates a DateTime set before "Now"
+var result = Dummy.Date.BeforeNow().Create();
+
+//Generates a DateTime set before "Today" (as in, "Today" is excluded from the potential results)
+var result = Dummy.Date.BeforeToday().Create();
+
+//Generates a DateTime set after "Now"
+var result = Dummy.Date.AfterNow().Create();
+
+//Generates a DateTime set after "Today" (as in, "Today" is excluded from the potential results)
+var result = Dummy.Date.AfterToday().Create();
 ```
 
 ## The `DummyStringBuilder`
