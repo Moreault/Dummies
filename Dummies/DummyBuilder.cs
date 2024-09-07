@@ -342,7 +342,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                 if (!typeof(T).IsEnum)
                 {
                     foreach (var property in typeof(T).GetAllProperties(x => x.IsInstance() &&
-                                 x.IsPublic() && x.IsGet() && x.SetMethod != null && x.SetMethod.IsPublic &&
+                                 x.IsPublic() && x.CanRead && x.SetMethod != null && x.SetMethod.IsPublic &&
                                  !x.IsIndexer()))
                     {
                         var memberValue = _memberValues.LastOrDefault(x => x.MemberInfo.Name == property.Name);
