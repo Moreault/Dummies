@@ -45,19 +45,3 @@ internal sealed record MemberValuePair
         Value = value;
     }
 }
-
-internal static class MemberInfoExtensions
-{
-    //TODO Use method from R4H .GetMemberType()
-    internal static Type GetMemberType(this MemberInfo memberInfo)
-    {
-        if (memberInfo == null) throw new ArgumentNullException(nameof(memberInfo));
-
-        if (memberInfo is PropertyInfo propertyInfo)
-            return propertyInfo.PropertyType;
-        if (memberInfo is FieldInfo fieldInfo)
-            return fieldInfo.FieldType;
-
-        throw new NotSupportedException($"MemberInfo of type {memberInfo.GetType()} is not supported.");
-    }
-}

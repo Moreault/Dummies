@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>3.0.0-beta2</Version>
+		<Version>3.0.0-beta4a</Version>
 		<RootNamespace>ToolBX.$(AssemblyName)</RootNamespace>
 		<PackageId>ToolBX.$(AssemblyName)</PackageId>
 		<Product>ToolBX.$(AssemblyName)</Product>
@@ -34,7 +34,7 @@
 		<PackageReference Include="ToolBX.CoinFlip" Version="3.0.0" />
 		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="2.2.1" />
 		<PackageReference Include="ToolBX.OPEX" Version="2.2.0" />
-		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="3.0.0-beta2" />
+		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="3.0.0-beta3" />
 		<PackageReference Include="ToolBX.TimeProvider" Version="2.2.0" />
 	</ItemGroup>
 
