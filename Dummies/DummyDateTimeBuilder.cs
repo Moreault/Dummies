@@ -1,27 +1,29 @@
-﻿namespace ToolBX.Dummies;
+﻿using ToolBX.TimeProvider;
+
+namespace ToolBX.Dummies;
 
 public interface IDummyDateTimeBuilder
 {
     /// <summary>
-    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="TimeProvider"/>.
     /// Use <see cref="Before(DateTime)"/> for more precise control.
     /// </summary>
     IDummyDateTimeBuilderLastStep BeforeNow();
 
     /// <summary>
-    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="TimeProvider"/>.
     /// Use <see cref="Before(DateTimeOffset)"/> or <see cref="Between(DateTimeOffset,DateTimeOffset)"/> for more precise control.
     /// </summary>
     IDummyDateTimeOffsetBuilderLastStep BeforeNowOffset();
 
     /// <summary>
-    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Returns a <see cref="DateTime"/> in the past using the current date. Compatible with <see cref="TimeProvider"/>.
     /// Use <see cref="Before(DateTime)"/> or <see cref="Between(DateTime,DateTime)"/> for more precise control.
     /// </summary>
     IDummyDateTimeBuilderLastStep BeforeToday();
 
     /// <summary>
-    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="ToolBX.TimeProvider.TimeProvider"/>.
+    /// Returns a <see cref="DateTimeOffset"/> in the past using the current date. Compatible with <see cref="TimeProvider"/>.
     /// Use <see cref="Before(DateTimeOffset)"/> or <see cref="Between(DateTimeOffset,DateTimeOffset)"/> for more precise control.
     /// </summary>
     IDummyDateTimeOffsetBuilderLastStep BeforeTodayOffset();
@@ -69,25 +71,25 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public IDummyDateTimeBuilderLastStep BeforeNow()
     {
-        var now = TimeProvider.TimeProvider.Now.UtcDateTime;
+        var now = GlobalTimeProvider.Now.UtcDateTime;
         return Between(now.AddYears(-5), now.AddMinutes(-1));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep BeforeNowOffset()
     {
-        var now = TimeProvider.TimeProvider.Now;
+        var now = GlobalTimeProvider.Now;
         return Between(now.AddYears(-5), now.AddMinutes(-1));
     }
 
     public IDummyDateTimeBuilderLastStep BeforeToday()
     {
-        var today = TimeProvider.TimeProvider.Now.UtcDateTime;
+        var today = GlobalTimeProvider.Now.UtcDateTime;
         return Between(today.AddYears(-5), today.AddDays(-1));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep BeforeTodayOffset()
     {
-        var today = TimeProvider.TimeProvider.Now;
+        var today = GlobalTimeProvider.Now;
         return Between(today.AddYears(-5), today.AddDays(-1));
     }
 
@@ -97,25 +99,25 @@ internal sealed class DummyDateTimeBuilder : IDummyDateTimeBuilder
 
     public IDummyDateTimeBuilderLastStep AfterNow()
     {
-        var now = TimeProvider.TimeProvider.Now.UtcDateTime;
+        var now = GlobalTimeProvider.Now.UtcDateTime;
         return Between(now.AddMinutes(1), now.AddYears(5));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep AfterNowOffset()
     {
-        var now = TimeProvider.TimeProvider.Now;
+        var now = GlobalTimeProvider.Now;
         return Between(now.AddMinutes(1), now.AddYears(5));
     }
 
     public IDummyDateTimeBuilderLastStep AfterToday()
     {
-        var today = TimeProvider.TimeProvider.Now.UtcDateTime;
+        var today = GlobalTimeProvider.Now.UtcDateTime;
         return Between(today.AddDays(1), today.AddYears(5));
     }
 
     public IDummyDateTimeOffsetBuilderLastStep AfterTodayOffset()
     {
-        var today = TimeProvider.TimeProvider.Now;
+        var today = GlobalTimeProvider.Now;
         return Between(today.AddDays(1), today.AddYears(5));
     }
 

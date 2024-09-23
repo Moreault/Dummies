@@ -1,6 +1,4 @@
-﻿using TimeProvider = ToolBX.TimeProvider.TimeProvider;
-
-namespace Dummies.Tests;
+﻿namespace Dummies.Tests;
 
 [TestClass]
 public sealed class DummyDateTimeBuilderTests : Tester
@@ -422,7 +420,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTime>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.BeforeNow().CreateMany(25).ToList();
@@ -436,7 +434,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTimeOffset>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.BeforeNowOffset().CreateMany(25).ToList();
@@ -450,7 +448,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTime>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.BeforeToday().CreateMany(25).ToList();
@@ -464,7 +462,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTimeOffset>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.BeforeTodayOffset().CreateMany(25).ToList();
@@ -478,7 +476,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTime>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.AfterNow().CreateMany(25).ToList();
@@ -492,7 +490,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTimeOffset>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.AfterNowOffset().CreateMany(25).ToList();
@@ -506,7 +504,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTime>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.AfterToday().CreateMany(25).ToList();
@@ -520,7 +518,7 @@ public sealed class DummyDateTimeBuilderTests : Tester
     {
         //Arrange
         var now = Dummy.Create<DateTimeOffset>();
-        TimeProvider.Freeze(now);
+        GlobalTimeProvider.Freeze(now);
 
         //Act
         var result = Dummy.Date.AfterTodayOffset().CreateMany(25).ToList();

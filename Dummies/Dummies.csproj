@@ -32,10 +32,10 @@
 	<ItemGroup>
 		<PackageReference Include="Castle.Core" Version="5.1.1" />
 		<PackageReference Include="ToolBX.CoinFlip" Version="3.0.0" />
-		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="2.2.1" />
-		<PackageReference Include="ToolBX.OPEX" Version="2.2.0" />
-		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="3.0.0-beta4" />
-		<PackageReference Include="ToolBX.TimeProvider" Version="2.2.0" />
+		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="3.0.0-beta1" />
+		<PackageReference Include="ToolBX.OPEX" Version="3.0.0-beta1" />
+		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="3.0.0-beta5" />
+		<PackageReference Include="ToolBX.TimeProvider" Version="3.0.0-beta1" />
 	</ItemGroup>
 
 	<ItemGroup>

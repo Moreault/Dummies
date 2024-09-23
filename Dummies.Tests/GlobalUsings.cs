@@ -19,3 +19,4 @@ global using ToolBX.OPEX;
 global using ToolBX.OPEX.Utilities;
 global using ToolBX.Reflection4Humans.Extensions;
 global using ToolBX.SmartyStrings;
+global using ToolBX.TimeProvider;
