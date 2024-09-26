@@ -1,8 +1,6 @@
 ![Dummies](https://github.com/Moreault/Dummies/blob/master/dummies.png)
 # Dummies
 
-:warning: This project is still in pre-release
-
 Dummies makes it easier to write unit tests by automating part of, or the entirety of, the creation of objects. It is flexible and allows you to customize how some objects are generated. It draws a lot of inspiration from [AutoFixture](https://github.com/AutoFixture/AutoFixture) and the two look a lot alike on the surface. If you are familiar with AutoFixture, then Dummies should come naturally to you.
 
 ## Getting Started
