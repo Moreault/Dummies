@@ -41,6 +41,8 @@ public interface IDummy
     IEnumerable<object> CreateMany(Type type);
     IEnumerable<object> CreateMany(Type type, int amount);
 
+    IEnumerable<T> CreateDistinct<T>(int amount);
+
     IDummyBuilder<T> Build<T>();
     IDummy Customize(params ICustomization[] customizations);
     IDummy Customize(IEnumerable<ICustomization> customizations);
@@ -59,11 +61,16 @@ public interface IDummy
     /// Using <see cref="Create"/> on type <see cref="T"/> will always return the registered instance.
     /// </summary>
     void Register<T>(T? instance);
+
+    /// <summary>
+    /// Creates a <see cref="T"/> and registers it so that all subsequent calls to <see cref="Create{T}"/> return the same instance.
+    /// </summary>
+    T Freeze<T>();
 }
 
 public sealed class Dummy : IDummy
 {
-    private readonly List<long> _generatedNumbers = [];
+    private readonly HashSet<long> _generatedNumbers = [];
 
     internal List<ICustomization> Customizations { get; } = [];
 
@@ -73,15 +80,30 @@ public sealed class Dummy : IDummy
 
     public DummyOptions Options { get; } = new();
 
-    public IDummyNumberBuilder Number => new DummyNumberBuilder(this);
+    public Dummy()
+    {
+        _number = new Lazy<IDummyNumberBuilder>(() => new DummyNumberBuilder(this));
+        _date = new Lazy<IDummyDateTimeBuilder>(() => new DummyDateTimeBuilder(this));
+        _string = new Lazy<IDummyStringBuilder>(() => new DummyStringBuilder(this));
+        _fileName = new Lazy<IDummyFileNameBuilder>(() => new DummyFileNameBuilder(this));
+        _path = new Lazy<IDummyPathBuilder>(() => new DummyPathBuilder(this));
+    }
 
-    public IDummyDateTimeBuilder Date => new DummyDateTimeBuilder(this);
+    private readonly Lazy<IDummyNumberBuilder> _number;
+    private readonly Lazy<IDummyDateTimeBuilder> _date;
+    private readonly Lazy<IDummyStringBuilder> _string;
+    private readonly Lazy<IDummyFileNameBuilder> _fileName;
+    private readonly Lazy<IDummyPathBuilder> _path;
 
-    public IDummyStringBuilder String => new DummyStringBuilder(this);
+    public IDummyNumberBuilder Number => _number.Value;
 
-    public IDummyFileNameBuilder FileName => new DummyFileNameBuilder(this);
+    public IDummyDateTimeBuilder Date => _date.Value;
 
-    public IDummyPathBuilder Path => new DummyPathBuilder(this);
+    public IDummyStringBuilder String => _string.Value;
+
+    public IDummyFileNameBuilder FileName => _fileName.Value;
+
+    public IDummyPathBuilder Path => _path.Value;
 
     public IDummyEnumBuilder<T> Enum<T>() where T : Enum => new DummyEnumBuilder<T>(this);
 
@@ -100,12 +122,20 @@ public sealed class Dummy : IDummy
         return new DummyBuilder<T>(this, currentDepth).Create();
     }
 
+    private static readonly ConcurrentDictionary<Type, MethodInfo> _createMethodCache = new();
+
+    private static MethodInfo GetOrCreateGenericMethod(Type type)
+    {
+        return _createMethodCache.GetOrAdd(type, t =>
+            typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.IsInternal() && x.ContainsGenericParameters).MakeGenericMethod(t));
+    }
+
     public object Create(Type type) => Create(type, 0);
 
     internal object Create(Type type, int currentDepth)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
-        return typeof(Dummy).GetSingleMethod(x => x.Name == nameof(Create) && x.IsInternal() && x.ContainsGenericParameters).MakeGenericMethod(type).Invoke(this, [currentDepth])!;
+        return GetOrCreateGenericMethod(type).Invoke(this, [currentDepth])!;
     }
 
     public IEnumerable<T> CreateMany<T>() => CreateMany<T>(Options.DefaultCollectionSize);
@@ -135,6 +165,22 @@ public sealed class Dummy : IDummy
         return results;
     }
 
+    public IEnumerable<T> CreateDistinct<T>(int amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(amount, nameof(amount));
+
+        var results = new HashSet<T>();
+        var maxAttempts = amount * Options.UniqueGenerationAttempts;
+        var attempts = 0;
+        while (results.Count < amount)
+        {
+            if (attempts++ >= maxAttempts)
+                throw new InvalidOperationException($"Could not generate {amount} distinct values of type {typeof(T).GetHumanReadableName()} after {maxAttempts} attempts.");
+            results.Add(Create<T>());
+        }
+        return results;
+    }
+
     public IDummyBuilder<T> Build<T>() => new DummyBuilder<T>(this);
 
     public IDummy Customize(params ICustomization[] customizations) => Customize(customizations as IEnumerable<ICustomization>);
@@ -157,6 +203,13 @@ public sealed class Dummy : IDummy
     }
 
     public void Register<T>(T? instance) => _registered[typeof(T)] = instance;
+
+    public T Freeze<T>()
+    {
+        var instance = Create<T>();
+        Register(instance);
+        return instance;
+    }
 
     internal bool TryGenerate<T>(T value) where T : INumber<T>
     {

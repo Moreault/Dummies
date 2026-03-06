@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<Version>3.0.0-beta4a</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>4.0.0</Version>
 		<RootNamespace>ToolBX.$(AssemblyName)</RootNamespace>
 		<PackageId>ToolBX.$(AssemblyName)</PackageId>
 		<Product>ToolBX.$(AssemblyName)</Product>
@@ -16,6 +16,14 @@
 		<Description>A lightweight object generation framework for unit testing purposes</Description>
 		<PackageIcon>dummies.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>

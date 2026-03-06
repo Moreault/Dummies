@@ -327,9 +327,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                         var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
                             .OrderByDescending(x => x.IsPublic).ThenBy(x => x.GetParameters().Length);
 
-                        var instantiation = TryInstantiate(_dummy, constructors);
+                        var instantiation = TryInstantiate(_dummy, constructors, out var constructorExceptions);
                         if (!instantiation.IsSuccess)
-                            throw new InstantiationException(typeof(T));
+                            throw new InstantiationException(typeof(T), constructorExceptions);
 
                         instance = instantiation.Value;
                     }
@@ -379,27 +379,32 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return output;
     }
 
-    private static Result<T> TryInstantiate(IDummy dummy, IEnumerable<ConstructorInfo> constructors)
+    private static Result<T> TryInstantiate(IDummy dummy, IEnumerable<ConstructorInfo> constructors, out List<Exception> exceptions)
     {
+        exceptions = [];
         foreach (var constructor in constructors)
         {
-            var instantiation = TryInstantiate(dummy, constructor);
+            var instantiation = TryInstantiate(dummy, constructor, out var exception);
             if (instantiation.IsSuccess)
             {
                 return instantiation;
             }
+            if (exception is not null)
+                exceptions.Add(exception);
         }
         return Result<T>.Failure();
     }
 
-    private static Result<T> TryInstantiate(IDummy dummy, ConstructorInfo constructor)
+    private static Result<T> TryInstantiate(IDummy dummy, ConstructorInfo constructor, out Exception? exception)
     {
+        exception = null;
         try
         {
             return Result<T>.Success((T)constructor.Invoke(constructor.GetParameters().Select(x => dummy.Create(x.ParameterType)).ToArray()));
         }
-        catch
+        catch (Exception ex)
         {
+            exception = ex;
             return Result<T>.Failure();
         }
     }

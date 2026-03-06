@@ -30,7 +30,7 @@ public class DummyTests : Tester
 
     public sealed record GarbageType
     {
-        public string A { get; init; }
+        public string? A { get; init; }
         public int B { get; init; }
         public int C { get; init; }
         public char D { get; init; }
@@ -323,7 +323,6 @@ public class DummyTests : Tester
     public void CreateMany_WhenGlobalDefaultCollectionSizeIsSet_ReturnCollectionWithThatNumberOfElements()
     {
         //Arrange
-        var defaultSize = DummyOptions.Global.DefaultCollectionSize;
         DummyOptions.Global.DefaultCollectionSize = 7;
 
         //Act
@@ -331,7 +330,118 @@ public class DummyTests : Tester
 
         //Assert
         result.Should().HaveCount(7);
-        //Setting it to default value because otherwise it affects all tests
-        DummyOptions.Global.DefaultCollectionSize = defaultSize;
+    }
+
+    [TestMethod]
+    public void Freeze_Always_ReturnCreatedInstance()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Freeze<GarbageType>();
+
+        //Assert
+        result.Should().NotBeNull();
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledOnce_SubsequentCreateReturnsSameInstance()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<GarbageType>();
+
+        //Act
+        var result = Dummy.Create<GarbageType>();
+
+        //Assert
+        result.Should().BeSameAs(frozen);
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledOnce_SubsequentCreateManyReturnsFrozenInstance()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<GarbageType>();
+
+        //Act
+        var result = Dummy.CreateMany<GarbageType>(3);
+
+        //Assert
+        result.Should().AllSatisfy(x => x.Should().BeSameAs(frozen));
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledWithValueType_SubsequentCreateReturnsSameValue()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<int>();
+
+        //Act
+        var result = Dummy.Create<int>();
+
+        //Assert
+        result.Should().Be(frozen);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsZero_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<int>(0);
+
+        //Assert
+        action.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("amount");
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsNegative_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<int>(-1);
+
+        //Assert
+        action.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("amount");
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsPositive_ReturnDistinctValues()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateDistinct<int>(5).ToList();
+
+        //Assert
+        result.Should().HaveCount(5);
+        result.Distinct().Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenGeneratingStrings_ReturnDistinctValues()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateDistinct<string>(5).ToList();
+
+        //Assert
+        result.Should().HaveCount(5);
+        result.Distinct().Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenCannotGenerateEnoughDistinctValues_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<bool>(3).ToList();
+
+        //Assert
+        action.Should().Throw<InvalidOperationException>();
     }
 }

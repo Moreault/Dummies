@@ -47,5 +47,9 @@ internal sealed class DepthGuardDummy : IDummy
 
     public void Register<T>(T? instance) => _dummy.Register(instance);
 
+    public T Freeze<T>() => _dummy.Freeze<T>();
+
+    public IEnumerable<T> CreateDistinct<T>(int amount) => _dummy.CreateDistinct<T>(amount);
+
     public DepthGuardDummy Deeper() => new(_dummy, CurrentDepth + 1);
 }

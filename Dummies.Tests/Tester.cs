@@ -11,6 +11,12 @@ public abstract class Tester
         TestInitialize();
     }
 
+    [TestCleanup]
+    public void TestCleanupBase()
+    {
+        ((GlobalDummyOptions)DummyOptions.Global).Reset();
+    }
+
     protected void TestInitialize()
     {
 

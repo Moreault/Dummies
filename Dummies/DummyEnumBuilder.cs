@@ -28,8 +28,8 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     public IDummyEnumBuilder<T> OneOf(IEnumerable<T> values)
     {
-        if (values.IsNullOrEmpty()) 
-            throw new ArgumentException("Values should be emtpy", nameof(values));
+        if (values.IsNullOrEmpty())
+            throw new ArgumentException("Values should not be empty", nameof(values));
         _generator = () => values.GetRandom();
         return this;
     }

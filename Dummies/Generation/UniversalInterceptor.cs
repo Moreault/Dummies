@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies.Generation;
+namespace ToolBX.Dummies.Generation;
 
 internal sealed class UniversalInterceptor : IInterceptor
 {
@@ -19,7 +19,7 @@ internal sealed class UniversalInterceptor : IInterceptor
             {
                 var returnType = invocation.Method.ReturnType;
                 var defaultValue = returnType.GetDefaultValue();
-                _propertyValues[propertyName] = defaultValue;
+                _propertyValues[propertyName] = defaultValue!;
                 invocation.ReturnValue = defaultValue;
             }
         }

@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyOptions
 {
@@ -13,15 +13,29 @@ public interface IDummyOptions
 
 internal sealed class GlobalDummyOptions : IDummyOptions
 {
-    public int DefaultCollectionSize { get; set; } = 3;
-    public int MaximumDepth { get; set; } = 3;
+    private static class FactorySettings
+    {
+        internal const int CollectionSize = 3;
+        internal const int MaximumDepth = 3;
+        internal const int UniqueGenerationAttempts = 3;
+    }
+
+    public int DefaultCollectionSize { get; set; } = FactorySettings.CollectionSize;
+    public int MaximumDepth { get; set; } = FactorySettings.MaximumDepth;
 
     public int UniqueGenerationAttempts
     {
         get => _uniqueGenerationAttempts;
         set => _uniqueGenerationAttempts = Math.Clamp(value, 1, int.MaxValue);
     }
-    private int _uniqueGenerationAttempts;
+    private int _uniqueGenerationAttempts = FactorySettings.UniqueGenerationAttempts;
+
+    internal void Reset()
+    {
+        DefaultCollectionSize = FactorySettings.CollectionSize;
+        MaximumDepth = FactorySettings.MaximumDepth;
+        UniqueGenerationAttempts = FactorySettings.UniqueGenerationAttempts;
+    }
 }
 
 public sealed class DummyOptions : IDummyOptions
