@@ -26,7 +26,7 @@ internal sealed class UniversalInterceptor : IInterceptor
         else if (methodName.StartsWith("set_", StringComparison.OrdinalIgnoreCase))
         {
             var propertyName = methodName[4..];
-            _propertyValues[propertyName] = invocation.Arguments[0];
+            _propertyValues[propertyName] = invocation.Arguments[0]!;
         }
         else if (invocation.Method.IsAbstract && invocation.Method.ReturnType != typeof(void))
         {
