@@ -1,6 +1,7 @@
 ﻿namespace ToolBX.Dummies.Customizations.ComplexTypes;
 
 [AutoCustomization]
+[UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "GetMethods is used to find static Create methods, not BuildMe.")]
 public sealed class FuncCustomization : CustomizationBase
 {
     protected override IEnumerable<Type> Types =>
@@ -24,15 +25,26 @@ public sealed class FuncCustomization : CustomizationBase
         typeof(Func<,,,,,,,,,,,,,,,,>),
     ];
 
+    private static readonly MethodInfo[] CreateMethodsByArity = typeof(FuncCustomization)
+        .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+        .Where(m => m.Name == nameof(Create) && m.IsGenericMethodDefinition)
+        .OrderBy(m => m.GetGenericArguments().Length)
+        .ToArray();
+
+    private static readonly ConcurrentDictionary<TypeArrayKey, MethodInfo> _cache = new();
+
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     protected override IDummyBuilder BuildMe(IDummy dummy, Type type)
     {
         return dummy.Build<object>().FromFactory(() =>
         {
             var genericArguments = type.GetGenericArguments();
 
-            return typeof(FuncCustomization)
-                .GetSingleMethod(x => x.Name == nameof(Create) && x.GetGenericArguments().Length == genericArguments.Length).MakeGenericMethod(genericArguments)
-                .Invoke(null, null)!;
+            var method = _cache.GetOrAdd(new TypeArrayKey(genericArguments), key =>
+                CreateMethodsByArity[key.Types.Length - 1].MakeGenericMethod(key.Types));
+
+            return method.Invoke(null, null)!;
         });
     }
 

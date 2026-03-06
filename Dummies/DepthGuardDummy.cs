@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 internal sealed class DepthGuardDummy : IDummy
 {
@@ -23,19 +23,33 @@ internal sealed class DepthGuardDummy : IDummy
 
     public IDummyEnumBuilder<T> Enum<T>() where T : Enum => _dummy.Enum<T>();
 
-    public T Create<T>() => _dummy.Create<T>(CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>() => _dummy.Create<T>(CurrentDepth);
 
-    public object Create(Type type) => _dummy.Create(type, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type) => _dummy.Create(type, CurrentDepth);
 
-    public IEnumerable<T> CreateMany<T>() => _dummy.CreateMany<T>(_dummy.Options.DefaultCollectionSize, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IEnumerable<T> CreateMany<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>() => _dummy.CreateMany<T>(_dummy.Options.DefaultCollectionSize, CurrentDepth);
 
-    public IEnumerable<T> CreateMany<T>(int amount) => _dummy.CreateMany<T>(amount, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IEnumerable<T> CreateMany<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(int amount) => _dummy.CreateMany<T>(amount, CurrentDepth);
 
-    public IEnumerable<object> CreateMany(Type type) => _dummy.CreateMany(type, _dummy.Options.DefaultCollectionSize, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type) => _dummy.CreateMany(type, _dummy.Options.DefaultCollectionSize, CurrentDepth);
 
-    public IEnumerable<object> CreateMany(Type type, int amount) => _dummy.CreateMany(type, amount, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int amount) => _dummy.CreateMany(type, amount, CurrentDepth);
 
-    public IDummyBuilder<T> Build<T>() => new DummyBuilder<T>(_dummy, CurrentDepth);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IDummyBuilder<T> Build<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>() => new DummyBuilder<T>(_dummy, CurrentDepth);
 
     public IDummy Customize(params ICustomization[] customizations) => _dummy.Customize(customizations);
 
@@ -47,9 +61,13 @@ internal sealed class DepthGuardDummy : IDummy
 
     public void Register<T>(T? instance) => _dummy.Register(instance);
 
-    public T Freeze<T>() => _dummy.Freeze<T>();
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public T Freeze<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>() => _dummy.Freeze<T>();
 
-    public IEnumerable<T> CreateDistinct<T>(int amount) => _dummy.CreateDistinct<T>(amount);
+    [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
+    [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
+    public IEnumerable<T> CreateDistinct<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(int amount) => _dummy.CreateDistinct<T>(amount);
 
     public DepthGuardDummy Deeper() => new(_dummy, CurrentDepth + 1);
 }

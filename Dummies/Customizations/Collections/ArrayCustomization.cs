@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies.Customizations.Collections;
+namespace ToolBX.Dummies.Customizations.Collections;
 
 [AutoCustomization]
 public sealed class ArrayCustomization : ArrayCustomizationBase
@@ -7,6 +7,8 @@ public sealed class ArrayCustomization : ArrayCustomizationBase
 
     protected override object Convert<T>(IEnumerable<T> source) => source.ToArray();
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     protected override object CreateMultiDimensionalArray(IDummy dummy, Type arrayType, Type elementType)
     {
         var rank = arrayType.GetArrayRank();
@@ -21,6 +23,8 @@ public sealed class ArrayCustomization : ArrayCustomizationBase
         return array;
     }
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     private void PopulateMultiDimensionalArray(IDummy dummy, Array array, Type elementType, int[] indices, int dimension)
     {
         if (dimension == indices.Length)

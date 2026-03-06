@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies.Customizations;
+namespace ToolBX.Dummies.Customizations;
 
 public abstract class OpenGenericCustomizationBase : ICustomization
 {
@@ -6,6 +6,10 @@ public abstract class OpenGenericCustomizationBase : ICustomization
 
     protected abstract IEnumerable<Type> Types { get; }
 
+    private static readonly ConcurrentDictionary<(Type CustomizationType, TypeArrayKey GenericArgs), MethodInfo> _cache = new();
+
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public IDummyBuilder Build(IDummy dummy, Type type)
     {
         if (dummy is null) throw new ArgumentNullException(nameof(dummy));
@@ -14,7 +18,9 @@ public abstract class OpenGenericCustomizationBase : ICustomization
         var genericTypes = type.GetGenericArguments().ToArray();
         if (genericTypes.Length == 0) throw new NotSupportedException($"{nameof(OpenGenericCustomizationBase)} does not support non-generic object customization");
 
-        var method = GetType().GetAllMethods(x => x.Name == nameof(FromFactory) && x.GetGenericArguments().Length == genericTypes.Length).Last().MakeGenericMethod(genericTypes);
+        var method = _cache.GetOrAdd((GetType(), new TypeArrayKey(genericTypes)), key =>
+            key.CustomizationType.GetAllMethods(x => x.Name == nameof(FromFactory) && x.GetGenericArguments().Length == key.GenericArgs.Types.Length)
+                .Last().MakeGenericMethod(key.GenericArgs.Types));
 
         return dummy.Build<object>().FromFactory(() => method.Invoke(this, [dummy])!);
     }

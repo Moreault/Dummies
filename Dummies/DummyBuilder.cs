@@ -95,11 +95,54 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum;
 }
 
-internal sealed class DummyBuilder<T> : IDummyBuilder<T>
+[RequiresUnreferencedCode("DummyBuilder uses reflection to construct and populate objects.")]
+[RequiresDynamicCode("DummyBuilder may require runtime code generation.")]
+internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T> : IDummyBuilder<T>
 {
-    private static ImmutableList<ICustomization> AutoCustomizations => _autoCustomizations.Value;
-    // ReSharper disable once InconsistentNaming
-    private static readonly Lazy<ImmutableList<ICustomization>> _autoCustomizations = new(() => Types.Where(x => x.HasAttribute<AutoCustomizationAttribute>() && !x.IsAbstract && x.Implements<ICustomization>()).Select(x => (ICustomization)Activator.CreateInstance(x)!).ToImmutableList());
+    private static readonly ImmutableList<ICustomization> BuiltInCustomizations = ImmutableList.Create<ICustomization>(
+        new BigIntegerCustomization(),
+        new BoolCustomization(),
+        new ByteCustomization(),
+        new CharCustomization(),
+        new DateOnlyCustomization(),
+        new DateTimeCustomization(),
+        new DateTimeOffsetCustomization(),
+        new DecimalCustomization(),
+        new DoubleCustomization(),
+        new FloatCustomization(),
+        new GuidCustomization(),
+        new Int16Customization(),
+        new Int32Customization(),
+        new Int64Customization(),
+        new IpAddressCustomization(),
+        new SByteCustomization(),
+        new StringCustomization(),
+        new TimeOnlyCustomization(),
+        new TimeSpanCustomization(),
+        new UInt16Customization(),
+        new UInt32Customization(),
+        new UInt64Customization(),
+        new ArrayCustomization(),
+        new ArrayListCustomization(),
+        new DictionaryCustomization(),
+        new GenericStackCustomization(),
+        new ImmutableArrayCustomization(),
+        new ImmutableDictionaryCustomization(),
+        new ImmutableListCustomization(),
+        new ListCustomization(),
+        new ActionCustomization(),
+        new EqualityComparerCustomization(),
+        new FuncCustomization()
+    );
+
+    private static ImmutableList<ICustomization> AutoCustomizations => BuiltInCustomizations.AddRange(_userCustomizations.Value);
+
+    private static readonly Lazy<ImmutableList<ICustomization>> _userCustomizations = new(() =>
+        Types.Where(x => x.Assembly != typeof(Dummy).Assembly
+            && x.HasAttribute<AutoCustomizationAttribute>()
+            && !x.IsAbstract && x.Implements<ICustomization>())
+        .Select(x => (ICustomization)Activator.CreateInstance(x)!)
+        .ToImmutableList());
 
     private readonly DepthGuardDummy _dummy;
 
@@ -137,7 +180,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         if (value is null) throw new ArgumentNullException(nameof(value));
         var memberExpression = GetMemberExpression(member.Body);
         ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
-        _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, new DeferredValue<TMember>(value)));
         return this;
     }
 

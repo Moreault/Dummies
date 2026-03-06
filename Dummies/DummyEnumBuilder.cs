@@ -18,6 +18,8 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     private readonly IDummy _dummy;
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode", Justification = "T is constrained to Enum which is always preserved by the runtime.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2091:DynamicallyAccessedMembers", Justification = "T is constrained to Enum which does not require DynamicallyAccessedMembers.")]
     internal DummyEnumBuilder(IDummy dummy)
     {
         _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
