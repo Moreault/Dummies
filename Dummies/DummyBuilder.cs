@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyBuilder
 {
@@ -99,51 +99,6 @@ public interface IDummyBuilder<T> : IDummyBuilder
 [RequiresDynamicCode("DummyBuilder may require runtime code generation.")]
 internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T> : IDummyBuilder<T>
 {
-    private static readonly ImmutableList<ICustomization> BuiltInCustomizations = ImmutableList.Create<ICustomization>(
-        new BigIntegerCustomization(),
-        new BoolCustomization(),
-        new ByteCustomization(),
-        new CharCustomization(),
-        new DateOnlyCustomization(),
-        new DateTimeCustomization(),
-        new DateTimeOffsetCustomization(),
-        new DecimalCustomization(),
-        new DoubleCustomization(),
-        new FloatCustomization(),
-        new GuidCustomization(),
-        new Int16Customization(),
-        new Int32Customization(),
-        new Int64Customization(),
-        new IpAddressCustomization(),
-        new SByteCustomization(),
-        new StringCustomization(),
-        new TimeOnlyCustomization(),
-        new TimeSpanCustomization(),
-        new UInt16Customization(),
-        new UInt32Customization(),
-        new UInt64Customization(),
-        new ArrayCustomization(),
-        new ArrayListCustomization(),
-        new DictionaryCustomization(),
-        new GenericStackCustomization(),
-        new ImmutableArrayCustomization(),
-        new ImmutableDictionaryCustomization(),
-        new ImmutableListCustomization(),
-        new ListCustomization(),
-        new ActionCustomization(),
-        new EqualityComparerCustomization(),
-        new FuncCustomization()
-    );
-
-    private static ImmutableList<ICustomization> AutoCustomizations => BuiltInCustomizations.AddRange(_userCustomizations.Value);
-
-    private static readonly Lazy<ImmutableList<ICustomization>> _userCustomizations = new(() =>
-        Types.Where(x => x.Assembly != typeof(Dummy).Assembly
-            && x.HasAttribute<AutoCustomizationAttribute>()
-            && !x.IsAbstract && x.Implements<ICustomization>())
-        .Select(x => (ICustomization)Activator.CreateInstance(x)!)
-        .ToImmutableList());
-
     private readonly DepthGuardDummy _dummy;
 
     private readonly List<MemberValuePair> _memberValues = [];
@@ -310,7 +265,7 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
 
     private ICustomization? FindCustomization(Type type)
     {
-        var customizations = AutoCustomizations.Concat(_dummy.Customizations).ToArray();
+        var customizations = AutoCustomizationProvider.AutoCustomizations.Concat(_dummy.Customizations).ToArray();
         return customizations.LastOrDefault(x => x.Condition(type)) ??
                (type.IsGenericType ? customizations.LastOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
     }
