@@ -143,11 +143,11 @@ public sealed class Dummy : IDummy
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    internal T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(int currentDepth)
+    internal T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(ImmutableList<Type> typeStack)
     {
         if (_registered.TryGetValue(typeof(T), out var value))
             return (T)value!;
-        return new DummyBuilder<T>(this, currentDepth).Create();
+        return new DummyBuilder<T>(this, typeStack).Create();
     }
 
     private static readonly ConcurrentDictionary<Type, MethodInfo> _createMethodCache = new();
@@ -162,14 +162,14 @@ public sealed class Dummy : IDummy
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type) => Create(type, 0);
+    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type) => Create(type, ImmutableList<Type>.Empty);
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    internal object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int currentDepth)
+    internal object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, ImmutableList<Type> typeStack)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
-        return GetOrCreateGenericMethod(type).Invoke(this, [currentDepth])!;
+        return GetOrCreateGenericMethod(type).Invoke(this, [typeStack])!;
     }
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
@@ -188,7 +188,7 @@ public sealed class Dummy : IDummy
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    internal IEnumerable<T> CreateMany<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(int amount, int currentDepth) => new DummyBuilder<T>(this, currentDepth).CreateMany(amount);
+    internal IEnumerable<T> CreateMany<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T>(int amount, ImmutableList<Type> typeStack) => new DummyBuilder<T>(this, typeStack).CreateMany(amount);
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
@@ -196,18 +196,18 @@ public sealed class Dummy : IDummy
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    public IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int amount) => CreateMany(type, amount, 0);
+    public IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int amount) => CreateMany(type, amount, ImmutableList<Type>.Empty);
 
     [RequiresUnreferencedCode("Creation of arbitrary types requires unreferenced code.")]
     [RequiresDynamicCode("Creation of arbitrary types may require runtime code generation.")]
-    internal IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int amount, int currentDepth)
+    internal IEnumerable<object> CreateMany([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type, int amount, ImmutableList<Type> typeStack)
     {
         if (type is null) throw new ArgumentNullException(nameof(type));
         ArgumentOutOfRangeException.ThrowIfNegative(amount, nameof(amount));
 
         var results = new List<object>();
         for (var i = 0; i < amount; i++)
-            results.Add(Create(type, currentDepth));
+            results.Add(Create(type, typeStack));
         return results;
     }
 

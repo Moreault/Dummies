@@ -155,9 +155,9 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
     private bool _withoutAutoProperties;
     private bool _omitAutoProperties;
 
-    internal DummyBuilder(Dummy dummy, int currentDepth = 0)
+    internal DummyBuilder(Dummy dummy, ImmutableList<Type>? typeStack = null)
     {
-        _dummy = new DepthGuardDummy(dummy, currentDepth) ?? throw new ArgumentNullException(nameof(dummy));
+        _dummy = new DepthGuardDummy(dummy, typeStack) ?? throw new ArgumentNullException(nameof(dummy));
     }
 
     internal DummyBuilder(DepthGuardDummy dummy)
@@ -342,14 +342,14 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
             }
         }
 
-        var deeperDummy = _dummy.Deeper();
+        var typedDummy = _dummy.ForType(typeof(T));
 
         var output = new List<T>();
         for (var i = 0; i < amount; i++)
         {
             //Needs to be boxed in case it's a struct so that modifications to its properties after instantiation are kept
             object? instance = default(T)!;
-            if (_dummy.CurrentDepth <= _dummy.Options.MaximumDepth)
+            if (!_dummy.IsRecursionLimitReached(typeof(T)))
             {
                 if (_factory is null)
                 {
@@ -370,7 +370,7 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
                         var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
                             .OrderByDescending(x => x.IsPublic).ThenBy(x => x.GetParameters().Length);
 
-                        var instantiation = TryInstantiate(_dummy, constructors, out var constructorExceptions);
+                        var instantiation = TryInstantiate(typedDummy, constructors, out var constructorExceptions);
                         if (!instantiation.IsSuccess)
                             throw new InstantiationException(typeof(T), constructorExceptions);
 
@@ -394,7 +394,7 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
                             if (_withoutAutoProperties)
                                 property.SetValue(instance, default);
                             else if (!_omitAutoProperties)
-                                property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                                property.SetValue(instance, typedDummy.Create(property.PropertyType));
                         }
                         else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
                             property.SetValue(instance, memberValue.Value);
@@ -408,7 +408,7 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
                             if (_withoutAutoProperties)
                                 field.SetValue(instance, default);
                             else if (!_omitAutoProperties)
-                                field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                                field.SetValue(instance, typedDummy.Create(field.FieldType));
                         }
                         else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
                             field.SetValue(instance, memberValue.Value);

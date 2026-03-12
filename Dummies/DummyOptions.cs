@@ -3,6 +3,11 @@ namespace ToolBX.Dummies;
 public interface IDummyOptions
 {
     int DefaultCollectionSize { get; set; }
+
+    /// <summary>
+    /// Maximum allowed occurrences of the same type in the creation chain before recursion is stopped.
+    /// Non-recursive deep chains (all different types) are not affected by this limit.
+    /// </summary>
     int MaximumDepth { get; set; }
 
     /// <summary>

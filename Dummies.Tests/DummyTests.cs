@@ -444,4 +444,99 @@ public class DummyTests : Tester
         //Assert
         action.Should().Throw<InvalidOperationException>();
     }
+
+    public sealed class ConstructorSelfReference
+    {
+        public int Id { get; }
+        public ConstructorSelfReference? Child { get; }
+
+        public ConstructorSelfReference(int id, ConstructorSelfReference? child)
+        {
+            Id = id;
+            Child = child;
+        }
+    }
+
+    [TestMethod]
+    public void Create_WhenConstructorTakesItself_DoesNotInfiniteLoop()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 3;
+
+        //Act
+        var action = () => Dummy.Create<ConstructorSelfReference>();
+
+        //Assert
+        action.Should().NotThrow();
+    }
+
+    public sealed class IndirectCycleA
+    {
+        public int Id { get; init; }
+        public IndirectCycleB? B { get; init; }
+    }
+
+    public sealed class IndirectCycleB
+    {
+        public int Id { get; init; }
+        public IndirectCycleA? A { get; init; }
+    }
+
+    [TestMethod]
+    public void Create_WhenIndirectCycle_RespectsLimit()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 3;
+
+        //Act
+        var action = () => Dummy.Create<IndirectCycleA>();
+
+        //Assert
+        action.Should().NotThrow();
+    }
+
+    public sealed class ChainA
+    {
+        public int Id { get; init; }
+        public ChainB? B { get; init; }
+    }
+
+    public sealed class ChainB
+    {
+        public int Id { get; init; }
+        public ChainC? C { get; init; }
+    }
+
+    public sealed class ChainC
+    {
+        public int Id { get; init; }
+        public ChainD? D { get; init; }
+    }
+
+    public sealed class ChainD
+    {
+        public int Id { get; init; }
+        public ChainE? E { get; init; }
+    }
+
+    public sealed class ChainE
+    {
+        public int Id { get; init; }
+    }
+
+    [TestMethod]
+    public void Create_WhenDeepNonRecursiveChain_WorksRegardlessOfMaximumDepth()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 1;
+
+        //Act
+        var result = Dummy.Create<ChainA>();
+
+        //Assert
+        result.B.Should().NotBeNull();
+        result.B!.C.Should().NotBeNull();
+        result.B.C!.D.Should().NotBeNull();
+        result.B.C.D!.E.Should().NotBeNull();
+    }
 }
