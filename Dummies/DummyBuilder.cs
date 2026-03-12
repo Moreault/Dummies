@@ -75,6 +75,11 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null);
 
     /// <summary>
+    /// Specifies how to create the object using the parent <see cref="IDummy"/>. Use this when <see cref="Dummy"/> can't create an object on its own.
+    /// </summary>
+    IDummyBuilder<T> FromFactory(Func<IDummy, T> factory, FactoryOptions? options = null);
+
+    /// <summary>
     /// Will create a random object from one of the given types.
     /// </summary>
     IDummyBuilder<T> FromTypes(IEnumerable<Type> types);
@@ -230,6 +235,12 @@ internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccess
 
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         return this;
+    }
+
+    public IDummyBuilder<T> FromFactory(Func<IDummy, T> factory, FactoryOptions? options = null)
+    {
+        if (factory is null) throw new ArgumentNullException(nameof(factory));
+        return FromFactory(() => factory(_dummy), options);
     }
 
     public IDummyBuilder<T> FromTypes(IEnumerable<Type> types)
