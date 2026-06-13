@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests.Customizations.BaseTypes;
+namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
 public sealed class TimeOnlyCustomizationTests : CustomizationTester<TimeOnlyCustomization>

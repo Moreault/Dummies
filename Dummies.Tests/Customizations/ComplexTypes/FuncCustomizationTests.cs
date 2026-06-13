@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests.Customizations.ComplexTypes;
+namespace Dummies.Tests.Customizations.ComplexTypes;
 
 [TestClass]
 public class FuncTests : CustomizationTester<FuncCustomization>

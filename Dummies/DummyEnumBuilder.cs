@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyEnumBuilder<T> where T : Enum
 {
@@ -40,7 +40,7 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     public IDummyEnumBuilder<T> Exclude(IEnumerable<T> values)
     {
-        _generator = () => EnumUtils.ToList<T>().Where(x => !values.Contains(x)).GetRandom();
+        _generator = () => Enum.GetValues(typeof(T)).Cast<T>().Where(x => !values.Contains(x)).GetRandom();
         return this;
     }
 

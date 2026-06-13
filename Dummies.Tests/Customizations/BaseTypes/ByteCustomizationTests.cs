@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests.Customizations.BaseTypes;
+namespace Dummies.Tests.Customizations.BaseTypes;
 
 [TestClass]
 public sealed class ByteCustomizationTests : CustomizationTester<ByteCustomization>
@@ -12,7 +12,7 @@ public sealed class ByteCustomizationTests : CustomizationTester<ByteCustomizati
         var result = Dummy.Create<byte>();
 
         //Assert
-        result.Should().BeGreaterThan(0);
+        result.Should().BeGreaterThan((byte)0);
     }
 
     [TestMethod]

@@ -13,7 +13,7 @@ public class DummyTests : Tester
 
         //Assert
         result.Should().NotBeNull();
-        result.Should().BeAssignableTo(typeof(IFormatProvider));
+        result.Should().BeAssignableTo<IFormatProvider>();
     }
 
     [TestMethod]
