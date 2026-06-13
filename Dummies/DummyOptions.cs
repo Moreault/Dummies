@@ -22,7 +22,7 @@ internal sealed class GlobalDummyOptions : IDummyOptions
     {
         internal const int CollectionSize = 3;
         internal const int MaximumDepth = 3;
-        internal const int UniqueGenerationAttempts = 3;
+        internal const int UniqueGenerationAttempts = 300;
     }
 
     public int DefaultCollectionSize { get; set; } = FactorySettings.CollectionSize;
