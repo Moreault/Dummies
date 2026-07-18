@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <Version>4.0.0-beta.1</Version>
+    <Version>4.0.0</Version>
 		<RootNamespace>ToolBX.$(AssemblyName)</RootNamespace>
 		<PackageId>ToolBX.$(AssemblyName)</PackageId>
 		<Product>ToolBX.$(AssemblyName)</Product>
@@ -41,11 +41,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Castle.Core" Version="5.2.1" />
-		<PackageReference Include="ToolBX.CoinFlip" Version="4.0.0-beta.1" />
-		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="4.0.0-beta.1" />
-		<PackageReference Include="ToolBX.OPEX" Version="4.0.0-beta.1" />
-		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="4.0.0-beta.2" />
-		<PackageReference Include="ToolBX.TimeProvider" Version="4.0.0-beta.1" />
+		<PackageReference Include="ToolBX.CoinFlip" Version="4.0.0" />
+		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="4.0.0" />
+		<PackageReference Include="ToolBX.OPEX" Version="4.0.0" />
+		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="4.0.0" />
+		<PackageReference Include="ToolBX.TimeProvider" Version="4.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
