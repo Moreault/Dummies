@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyBuilder
 {
@@ -75,6 +75,11 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> FromFactory(Func<T> factory, FactoryOptions? options = null);
 
     /// <summary>
+    /// Specifies how to create the object using the parent <see cref="IDummy"/>. Use this when <see cref="Dummy"/> can't create an object on its own.
+    /// </summary>
+    IDummyBuilder<T> FromFactory(Func<IDummy, T> factory, FactoryOptions? options = null);
+
+    /// <summary>
     /// Will create a random object from one of the given types.
     /// </summary>
     IDummyBuilder<T> FromTypes(IEnumerable<Type> types);
@@ -95,12 +100,10 @@ public interface IDummyBuilder<T> : IDummyBuilder
     IDummyBuilder<T> Exclude<TEnum>(IEnumerable<TEnum> values) where TEnum : Enum;
 }
 
-internal sealed class DummyBuilder<T> : IDummyBuilder<T>
+[RequiresUnreferencedCode("DummyBuilder uses reflection to construct and populate objects.")]
+[RequiresDynamicCode("DummyBuilder may require runtime code generation.")]
+internal sealed class DummyBuilder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] T> : IDummyBuilder<T>
 {
-    private static ImmutableList<ICustomization> AutoCustomizations => _autoCustomizations.Value;
-    // ReSharper disable once InconsistentNaming
-    private static readonly Lazy<ImmutableList<ICustomization>> _autoCustomizations = new(() => Types.Where(x => x.HasAttribute<AutoCustomizationAttribute>() && !x.IsAbstract && x.Implements<ICustomization>()).Select(x => (ICustomization)Activator.CreateInstance(x)!).ToImmutableList());
-
     private readonly DepthGuardDummy _dummy;
 
     private readonly List<MemberValuePair> _memberValues = [];
@@ -112,9 +115,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
     private bool _withoutAutoProperties;
     private bool _omitAutoProperties;
 
-    internal DummyBuilder(Dummy dummy, int currentDepth = 0)
+    internal DummyBuilder(Dummy dummy, ImmutableList<Type>? typeStack = null)
     {
-        _dummy = new DepthGuardDummy(dummy, currentDepth) ?? throw new ArgumentNullException(nameof(dummy));
+        _dummy = new DepthGuardDummy(dummy, typeStack) ?? throw new ArgumentNullException(nameof(dummy));
     }
 
     internal DummyBuilder(DepthGuardDummy dummy)
@@ -137,7 +140,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         if (value is null) throw new ArgumentNullException(nameof(value));
         var memberExpression = GetMemberExpression(member.Body);
         ThrowIfMemberIsReadOnly(memberExpression.Member.Name);
-        _memberValues.Add(new MemberValuePair(memberExpression.Member, value));
+        _memberValues.Add(new MemberValuePair(memberExpression.Member, new DeferredValue<TMember>(value)));
         return this;
     }
 
@@ -234,6 +237,12 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return this;
     }
 
+    public IDummyBuilder<T> FromFactory(Func<IDummy, T> factory, FactoryOptions? options = null)
+    {
+        if (factory is null) throw new ArgumentNullException(nameof(factory));
+        return FromFactory(() => factory(_dummy), options);
+    }
+
     public IDummyBuilder<T> FromTypes(IEnumerable<Type> types)
     {
         if (types is null) throw new ArgumentNullException(nameof(types));
@@ -267,7 +276,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
 
     private ICustomization? FindCustomization(Type type)
     {
-        var customizations = AutoCustomizations.Concat(_dummy.Customizations).ToArray();
+        var customizations = AutoCustomizationProvider.AutoCustomizations.Concat(_dummy.Customizations).ToArray();
         return customizations.LastOrDefault(x => x.Condition(type)) ??
                (type.IsGenericType ? customizations.LastOrDefault(x => x.Condition(type.GetGenericTypeDefinition())) : null);
     }
@@ -299,14 +308,14 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
             }
         }
 
-        var deeperDummy = _dummy.Deeper();
+        var typedDummy = _dummy.ForType(typeof(T));
 
         var output = new List<T>();
         for (var i = 0; i < amount; i++)
         {
             //Needs to be boxed in case it's a struct so that modifications to its properties after instantiation are kept
             object? instance = default(T)!;
-            if (_dummy.CurrentDepth <= _dummy.Options.MaximumDepth)
+            if (!_dummy.IsRecursionLimitReached(typeof(T)))
             {
                 if (_factory is null)
                 {
@@ -327,9 +336,9 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                         var constructors = typeof(T).GetAllConstructors().Where(x => x.IsInstance())
                             .OrderByDescending(x => x.IsPublic).ThenBy(x => x.GetParameters().Length);
 
-                        var instantiation = TryInstantiate(_dummy, constructors);
+                        var instantiation = TryInstantiate(typedDummy, constructors, out var constructorExceptions);
                         if (!instantiation.IsSuccess)
-                            throw new InstantiationException(typeof(T));
+                            throw new InstantiationException(typeof(T), constructorExceptions);
 
                         instance = instantiation.Value;
                     }
@@ -351,7 +360,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                             if (_withoutAutoProperties)
                                 property.SetValue(instance, default);
                             else if (!_omitAutoProperties)
-                                property.SetValue(instance, deeperDummy.Create(property.PropertyType));
+                                property.SetValue(instance, typedDummy.Create(property.PropertyType));
                         }
                         else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
                             property.SetValue(instance, memberValue.Value);
@@ -365,7 +374,7 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
                             if (_withoutAutoProperties)
                                 field.SetValue(instance, default);
                             else if (!_omitAutoProperties)
-                                field.SetValue(instance, deeperDummy.Create(field.FieldType));
+                                field.SetValue(instance, typedDummy.Create(field.FieldType));
                         }
                         else if (!Equals(memberValue.Value, MemberValuePair.Omit.Instance))
                             field.SetValue(instance, memberValue.Value);
@@ -379,27 +388,32 @@ internal sealed class DummyBuilder<T> : IDummyBuilder<T>
         return output;
     }
 
-    private static Result<T> TryInstantiate(IDummy dummy, IEnumerable<ConstructorInfo> constructors)
+    private static Result<T> TryInstantiate(IDummy dummy, IEnumerable<ConstructorInfo> constructors, out List<Exception> exceptions)
     {
+        exceptions = [];
         foreach (var constructor in constructors)
         {
-            var instantiation = TryInstantiate(dummy, constructor);
+            var instantiation = TryInstantiate(dummy, constructor, out var exception);
             if (instantiation.IsSuccess)
             {
                 return instantiation;
             }
+            if (exception is not null)
+                exceptions.Add(exception);
         }
         return Result<T>.Failure();
     }
 
-    private static Result<T> TryInstantiate(IDummy dummy, ConstructorInfo constructor)
+    private static Result<T> TryInstantiate(IDummy dummy, ConstructorInfo constructor, out Exception? exception)
     {
+        exception = null;
         try
         {
             return Result<T>.Success((T)constructor.Invoke(constructor.GetParameters().Select(x => dummy.Create(x.ParameterType)).ToArray()));
         }
-        catch
+        catch (Exception ex)
         {
+            exception = ex;
             return Result<T>.Failure();
         }
     }

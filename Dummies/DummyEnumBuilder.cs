@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyEnumBuilder<T> where T : Enum
 {
@@ -18,6 +18,8 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     private readonly IDummy _dummy;
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode", Justification = "T is constrained to Enum which is always preserved by the runtime.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2091:DynamicallyAccessedMembers", Justification = "T is constrained to Enum which does not require DynamicallyAccessedMembers.")]
     internal DummyEnumBuilder(IDummy dummy)
     {
         _dummy = dummy ?? throw new ArgumentNullException(nameof(dummy));
@@ -28,8 +30,8 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     public IDummyEnumBuilder<T> OneOf(IEnumerable<T> values)
     {
-        if (values.IsNullOrEmpty()) 
-            throw new ArgumentException("Values should be emtpy", nameof(values));
+        if (values.IsNullOrEmpty())
+            throw new ArgumentException("Values should not be empty", nameof(values));
         _generator = () => values.GetRandom();
         return this;
     }
@@ -38,7 +40,7 @@ internal sealed class DummyEnumBuilder<T> : IDummyEnumBuilder<T> where T : Enum
 
     public IDummyEnumBuilder<T> Exclude(IEnumerable<T> values)
     {
-        _generator = () => EnumUtils.ToList<T>().Where(x => !values.Contains(x)).GetRandom();
+        _generator = () => Enum.GetValues(typeof(T)).Cast<T>().Where(x => !values.Contains(x)).GetRandom();
         return this;
     }
 

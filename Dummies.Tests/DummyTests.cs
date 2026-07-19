@@ -13,7 +13,7 @@ public class DummyTests : Tester
 
         //Assert
         result.Should().NotBeNull();
-        result.Should().BeAssignableTo(typeof(IFormatProvider));
+        result.Should().BeAssignableTo<IFormatProvider>();
     }
 
     [TestMethod]
@@ -30,7 +30,7 @@ public class DummyTests : Tester
 
     public sealed record GarbageType
     {
-        public string A { get; init; }
+        public string? A { get; init; }
         public int B { get; init; }
         public int C { get; init; }
         public char D { get; init; }
@@ -323,7 +323,6 @@ public class DummyTests : Tester
     public void CreateMany_WhenGlobalDefaultCollectionSizeIsSet_ReturnCollectionWithThatNumberOfElements()
     {
         //Arrange
-        var defaultSize = DummyOptions.Global.DefaultCollectionSize;
         DummyOptions.Global.DefaultCollectionSize = 7;
 
         //Act
@@ -331,7 +330,213 @@ public class DummyTests : Tester
 
         //Assert
         result.Should().HaveCount(7);
-        //Setting it to default value because otherwise it affects all tests
-        DummyOptions.Global.DefaultCollectionSize = defaultSize;
+    }
+
+    [TestMethod]
+    public void Freeze_Always_ReturnCreatedInstance()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.Freeze<GarbageType>();
+
+        //Assert
+        result.Should().NotBeNull();
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledOnce_SubsequentCreateReturnsSameInstance()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<GarbageType>();
+
+        //Act
+        var result = Dummy.Create<GarbageType>();
+
+        //Assert
+        result.Should().BeSameAs(frozen);
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledOnce_SubsequentCreateManyReturnsFrozenInstance()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<GarbageType>();
+
+        //Act
+        var result = Dummy.CreateMany<GarbageType>(3);
+
+        //Assert
+        result.Should().AllSatisfy(x => x.Should().BeSameAs(frozen));
+    }
+
+    [TestMethod]
+    public void Freeze_WhenCalledWithValueType_SubsequentCreateReturnsSameValue()
+    {
+        //Arrange
+        var frozen = Dummy.Freeze<int>();
+
+        //Act
+        var result = Dummy.Create<int>();
+
+        //Assert
+        result.Should().Be(frozen);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsZero_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<int>(0);
+
+        //Assert
+        action.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("amount");
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsNegative_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<int>(-1);
+
+        //Assert
+        action.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("amount");
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenAmountIsPositive_ReturnDistinctValues()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateDistinct<int>(5).ToList();
+
+        //Assert
+        result.Should().HaveCount(5);
+        result.Distinct().Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenGeneratingStrings_ReturnDistinctValues()
+    {
+        //Arrange
+
+        //Act
+        var result = Dummy.CreateDistinct<string>(5).ToList();
+
+        //Assert
+        result.Should().HaveCount(5);
+        result.Distinct().Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void CreateDistinct_WhenCannotGenerateEnoughDistinctValues_Throw()
+    {
+        //Arrange
+
+        //Act
+        var action = () => Dummy.CreateDistinct<bool>(3).ToList();
+
+        //Assert
+        action.Should().Throw<InvalidOperationException>();
+    }
+
+    public sealed class ConstructorSelfReference
+    {
+        public int Id { get; }
+        public ConstructorSelfReference? Child { get; }
+
+        public ConstructorSelfReference(int id, ConstructorSelfReference? child)
+        {
+            Id = id;
+            Child = child;
+        }
+    }
+
+    [TestMethod]
+    public void Create_WhenConstructorTakesItself_DoesNotInfiniteLoop()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 3;
+
+        //Act
+        var action = () => Dummy.Create<ConstructorSelfReference>();
+
+        //Assert
+        action.Should().NotThrow();
+    }
+
+    public sealed class IndirectCycleA
+    {
+        public int Id { get; init; }
+        public IndirectCycleB? B { get; init; }
+    }
+
+    public sealed class IndirectCycleB
+    {
+        public int Id { get; init; }
+        public IndirectCycleA? A { get; init; }
+    }
+
+    [TestMethod]
+    public void Create_WhenIndirectCycle_RespectsLimit()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 3;
+
+        //Act
+        var action = () => Dummy.Create<IndirectCycleA>();
+
+        //Assert
+        action.Should().NotThrow();
+    }
+
+    public sealed class ChainA
+    {
+        public int Id { get; init; }
+        public ChainB? B { get; init; }
+    }
+
+    public sealed class ChainB
+    {
+        public int Id { get; init; }
+        public ChainC? C { get; init; }
+    }
+
+    public sealed class ChainC
+    {
+        public int Id { get; init; }
+        public ChainD? D { get; init; }
+    }
+
+    public sealed class ChainD
+    {
+        public int Id { get; init; }
+        public ChainE? E { get; init; }
+    }
+
+    public sealed class ChainE
+    {
+        public int Id { get; init; }
+    }
+
+    [TestMethod]
+    public void Create_WhenDeepNonRecursiveChain_WorksRegardlessOfMaximumDepth()
+    {
+        //Arrange
+        DummyOptions.Global.MaximumDepth = 1;
+
+        //Act
+        var result = Dummy.Create<ChainA>();
+
+        //Assert
+        result.B.Should().NotBeNull();
+        result.B!.C.Should().NotBeNull();
+        result.B.C!.D.Should().NotBeNull();
+        result.B.C.D!.E.Should().NotBeNull();
     }
 }

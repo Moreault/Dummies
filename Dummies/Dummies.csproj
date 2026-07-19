@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<Version>3.0.0-beta4a</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <Version>4.0.0</Version>
 		<RootNamespace>ToolBX.$(AssemblyName)</RootNamespace>
 		<PackageId>ToolBX.$(AssemblyName)</PackageId>
 		<Product>ToolBX.$(AssemblyName)</Product>
@@ -16,6 +18,14 @@
 		<Description>A lightweight object generation framework for unit testing purposes</Description>
 		<PackageIcon>dummies.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,12 +40,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Castle.Core" Version="5.1.1" />
-		<PackageReference Include="ToolBX.CoinFlip" Version="3.0.0" />
-		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="3.0.0" />
-		<PackageReference Include="ToolBX.OPEX" Version="3.0.1" />
-		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="3.0.0" />
-		<PackageReference Include="ToolBX.TimeProvider" Version="3.0.0" />
+		<PackageReference Include="Castle.Core" Version="5.2.1" />
+		<PackageReference Include="ToolBX.CoinFlip" Version="4.0.0" />
+		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="4.0.0" />
+		<PackageReference Include="ToolBX.OPEX" Version="4.0.0" />
+		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="4.0.0" />
+		<PackageReference Include="ToolBX.TimeProvider" Version="4.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

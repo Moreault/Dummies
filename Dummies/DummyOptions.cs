@@ -1,8 +1,13 @@
-﻿namespace ToolBX.Dummies;
+namespace ToolBX.Dummies;
 
 public interface IDummyOptions
 {
     int DefaultCollectionSize { get; set; }
+
+    /// <summary>
+    /// Maximum allowed occurrences of the same type in the creation chain before recursion is stopped.
+    /// Non-recursive deep chains (all different types) are not affected by this limit.
+    /// </summary>
     int MaximumDepth { get; set; }
 
     /// <summary>
@@ -13,15 +18,29 @@ public interface IDummyOptions
 
 internal sealed class GlobalDummyOptions : IDummyOptions
 {
-    public int DefaultCollectionSize { get; set; } = 3;
-    public int MaximumDepth { get; set; } = 3;
+    private static class FactorySettings
+    {
+        internal const int CollectionSize = 3;
+        internal const int MaximumDepth = 3;
+        internal const int UniqueGenerationAttempts = 300;
+    }
+
+    public int DefaultCollectionSize { get; set; } = FactorySettings.CollectionSize;
+    public int MaximumDepth { get; set; } = FactorySettings.MaximumDepth;
 
     public int UniqueGenerationAttempts
     {
         get => _uniqueGenerationAttempts;
         set => _uniqueGenerationAttempts = Math.Clamp(value, 1, int.MaxValue);
     }
-    private int _uniqueGenerationAttempts;
+    private int _uniqueGenerationAttempts = FactorySettings.UniqueGenerationAttempts;
+
+    internal void Reset()
+    {
+        DefaultCollectionSize = FactorySettings.CollectionSize;
+        MaximumDepth = FactorySettings.MaximumDepth;
+        UniqueGenerationAttempts = FactorySettings.UniqueGenerationAttempts;
+    }
 }
 
 public sealed class DummyOptions : IDummyOptions

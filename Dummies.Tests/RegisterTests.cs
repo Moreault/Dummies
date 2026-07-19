@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests;
+namespace Dummies.Tests;
 
 [TestClass]
 public sealed class RegisterTests : Tester
@@ -85,7 +85,7 @@ public sealed class RegisterTests : Tester
     }
 
     [TestMethod]
-    public void CreateMany_WhenTypIsRegisteredButBuildIsUsed_AlwaysReturnSomethingDifferent()
+    public void CreateMany_WhenTypeIsRegisteredButBuildIsUsed_AlwaysReturnSomethingDifferent()
     {
         //Arrange
         Dummy.Register(new Garbage

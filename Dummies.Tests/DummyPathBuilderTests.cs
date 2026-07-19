@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests;
+namespace Dummies.Tests;
 
 [TestClass]
 public sealed class DummyFilePathBuilderTests : Tester
@@ -12,7 +12,7 @@ public sealed class DummyFilePathBuilderTests : Tester
         var result = Dummy.Path.WithRoot.Windows().Create();
 
         //Assert
-        result[..3].Should().MatchRegex(Regexes.WindowsRoot);
+        result[..3].Should().Match(Regexes.WindowsRoot);
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public sealed class DummyFilePathBuilderTests : Tester
         var result = Dummy.Path.WithDepth.Exactly(0).Create();
 
         //Assert
-        result.Remove(0, 3).Should().MatchRegex(Regexes.Filename);
+        result.Remove(0, 3).Should().Match(Regexes.Filename);
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ public sealed class DummyFilePathBuilderTests : Tester
         var result = Dummy.Path.WithDepth.Exactly(1).Create();
 
         //Assert
-        result.Remove(0, 3).Split("/")[1].Should().MatchRegex(Regexes.Filename);
+        result.Remove(0, 3).Split("/")[1].Should().Match(Regexes.Filename);
     }
 
     [TestMethod]

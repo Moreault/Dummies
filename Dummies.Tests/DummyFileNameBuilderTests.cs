@@ -1,4 +1,4 @@
-﻿namespace Dummies.Tests;
+namespace Dummies.Tests;
 
 [TestClass]
 public sealed class DummyFileNameBuilderTests : Tester
@@ -12,7 +12,7 @@ public sealed class DummyFileNameBuilderTests : Tester
         var result = Dummy.FileName.Create();
 
         //Assert
-        result.Should().MatchRegex(Regexes.Filename);
+        result.Should().Match(Regexes.Filename);
     }
 
     [TestMethod]

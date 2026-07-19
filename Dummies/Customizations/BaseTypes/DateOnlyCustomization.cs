@@ -3,6 +3,8 @@
 [AutoCustomization]
 public sealed class DateOnlyCustomization : CustomizationBase<DateOnly>
 {
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public override IDummyBuilder<DateOnly> Build(IDummy dummy)
     {
         return dummy.Build<DateOnly>().FromFactory(() =>

@@ -3,6 +3,8 @@
 [AutoCustomization]
 public sealed class TimeSpanCustomization : CustomizationBase<TimeSpan>
 {
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public override IDummyBuilder<TimeSpan> Build(IDummy dummy)
     {
         return dummy.Build<TimeSpan>().FromFactory(() =>

@@ -18,11 +18,10 @@ internal sealed record MemberValuePair
             var valueType = _value.GetType();
             var value = _value;
 
-            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Func<>))
+            if (_value is IDeferredValue deferred)
             {
-                var method = valueType.GetMethod("Invoke")!;
-                valueType = method.ReturnType;
-                value = method.Invoke(_value, []);
+                value = deferred.Evaluate();
+                valueType = value?.GetType() ?? realType;
             }
 
             if (realType.IsAssignableFrom(valueType))

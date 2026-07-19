@@ -1,4 +1,4 @@
-﻿namespace ToolBX.Dummies.Customizations;
+namespace ToolBX.Dummies.Customizations;
 
 public abstract class CustomizationBase : ICustomization
 {
@@ -6,6 +6,8 @@ public abstract class CustomizationBase : ICustomization
 
     protected abstract IEnumerable<Type> Types { get; }
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public IDummyBuilder Build(IDummy dummy, Type type)
     {
         if (dummy is null) throw new ArgumentNullException(nameof(dummy));
@@ -13,6 +15,8 @@ public abstract class CustomizationBase : ICustomization
         return BuildMe(dummy, type);
     }
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     protected abstract IDummyBuilder BuildMe(IDummy dummy, Type type);
 }
 
@@ -22,7 +26,11 @@ public abstract class CustomizationBase<T> : CustomizationBase
 
     protected virtual IEnumerable<Type> AdditionalTypes { get; } = [];
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     protected override IDummyBuilder BuildMe(IDummy dummy, Type type) => Build(dummy);
 
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public abstract IDummyBuilder<T> Build(IDummy dummy);
 }

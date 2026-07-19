@@ -596,12 +596,12 @@ public sealed class DummyBuilderTests : Tester
 
         //Assert
         result.Name.Should().NotBeNullOrWhiteSpace();
-        result.Level.Should().BeGreaterOrEqualTo(1);
-        result.Experience.Should().BeGreaterOrEqualTo(1);
-        result.Gold.Should().BeGreaterOrEqualTo(1);
-        result.Health.Should().BeGreaterOrEqualTo(1);
-        result.Id.Should().BeGreaterOrEqualTo(1);
-        result.Symbol.Should().BeGreaterOrEqualTo(1);
+        result.Level.Should().BeGreaterThanOrEqualTo(1);
+        result.Experience.Should().BeGreaterThanOrEqualTo(1);
+        result.Gold.Should().BeGreaterThanOrEqualTo(1);
+        result.Health.Should().BeGreaterThanOrEqualTo(1);
+        result.Id.Should().BeGreaterThanOrEqualTo(1);
+        result.Symbol.Should().BeGreaterThanOrEqualTo(1);
     }
 
     [TestMethod]
@@ -614,9 +614,9 @@ public sealed class DummyBuilderTests : Tester
 
         //Assert
         result.Name.Should().NotBe("User");
-        result.Level.Should().BeGreaterOrEqualTo(1);
-        result.Experience.Should().BeGreaterOrEqualTo(1);
-        result.Id.Should().BeGreaterOrEqualTo(1);
+        result.Level.Should().BeGreaterThanOrEqualTo(1);
+        result.Experience.Should().BeGreaterThanOrEqualTo(1);
+        result.Id.Should().BeGreaterThanOrEqualTo(1);
     }
 
     [TestMethod]
@@ -629,8 +629,8 @@ public sealed class DummyBuilderTests : Tester
 
         //Assert
         result.Name.Should().Be("Seb");
-        result.Level.Should().BeGreaterOrEqualTo(1);
-        result.Experience.Should().BeGreaterOrEqualTo(1);
+        result.Level.Should().BeGreaterThanOrEqualTo(1);
+        result.Experience.Should().BeGreaterThanOrEqualTo(1);
         result.Id.Should().Be(99);
     }
 

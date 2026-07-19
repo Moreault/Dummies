@@ -3,6 +3,8 @@
 [AutoCustomization]
 public sealed class TimeOnlyCustomization : CustomizationBase<TimeOnly>
 {
+    [RequiresUnreferencedCode("Customization uses reflection to construct objects.")]
+    [RequiresDynamicCode("Customization may require runtime code generation.")]
     public override IDummyBuilder<TimeOnly> Build(IDummy dummy)
     {
         return dummy.Build<TimeOnly>().FromFactory(() =>
