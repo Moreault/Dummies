@@ -44,7 +44,7 @@
 		<PackageReference Include="ToolBX.CoinFlip" Version="4.0.0" />
 		<PackageReference Include="ToolBX.Mathemancy.Randomness" Version="4.0.0" />
 		<PackageReference Include="ToolBX.OPEX" Version="4.0.0" />
-		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="4.0.0" />
+		<PackageReference Include="ToolBX.Reflection4Humans.TypeFetcher" Version="4.0.1" />
 		<PackageReference Include="ToolBX.TimeProvider" Version="4.0.0" />
 	</ItemGroup>
 
